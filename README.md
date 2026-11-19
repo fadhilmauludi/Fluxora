@@ -4,17 +4,6 @@ Prototipe web untuk masalah di dokumen *Kelompok 5 — FLUXORA*: stok Shopee & T
 tidak sinkron, pesanan yang dicatat manual, buku kas yang dicocokkan tangan, dan PO ke maklon
 yang masih berdasarkan perkiraan.
 
-## Deploy ke Vercel
-Situs statis, tanpa build step.
-1. Push repo ini ke GitHub.
-2. Di [vercel.com/new](https://vercel.com/new), pilih **Import** repo tersebut.
-3. Framework preset: **Other**. Build command: kosong. Output directory: kosong (root).
-4. Klik **Deploy**.
-
-`vercel.json` sudah mengatur URL bersih (`/about`, `/docs/design-system`), header keamanan, dan cache font. Halaman `404.html` dipakai otomatis.
-
-Lewat CLI: `npx vercel` (preview) lalu `npx vercel --prod`.
-
 ## Halaman
 | URL | Isi |
 |---|---|
