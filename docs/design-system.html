@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fluxora — Sistem desain</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <style>
+    /* Page-only layout for the style guide. Still token-driven. */
+    body { background: var(--color-surface-canvas); }
+    .ds { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+    .ds-nav { position: sticky; top: 0; height: 100vh; overflow: auto; background: var(--color-surface-inverse); color: var(--color-text-on-inverse); padding: var(--space-6) var(--space-4); }
+    .ds-nav .brand { padding: 0 var(--space-2) var(--space-6); }
+    .ds-nav a { display: block; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); color: var(--color-text-on-inverse-muted); text-decoration: none; font-size: var(--font-size-small); font-weight: var(--font-weight-medium); }
+    .ds-nav a:hover { background: var(--color-surface-inverse-raised); color: var(--color-text-on-inverse); }
+    .ds-nav .grp { margin: var(--space-5) var(--space-3) var(--space-2); font-size: var(--font-size-caption); color: var(--color-text-on-inverse-muted); }
+    .ds-main { padding: var(--space-10) var(--space-12) var(--space-16); max-width: 1180px; display: grid; gap: var(--space-12); }
+    .ds-hero h1 { font-size: var(--font-size-display); line-height: var(--line-height-display); font-weight: var(--font-weight-display); letter-spacing: -0.03em; }
+    .ds-hero p { max-width: 68ch; color: var(--color-text-secondary); font-size: var(--font-size-title-sm); line-height: 24px; margin: var(--space-4) 0 0; }
+    section.s { display: grid; gap: var(--space-5); scroll-margin-top: var(--space-6); }
+    section.s > h2 { font-size: var(--font-size-heading); line-height: var(--line-height-heading); font-weight: var(--font-weight-bold); letter-spacing: var(--letter-spacing-tight); }
+    section.s > p { margin: 0; max-width: 72ch; color: var(--color-text-secondary); }
+    h3.sub { font-size: var(--font-size-title-sm); font-weight: var(--font-weight-semibold); margin-top: var(--space-2); }
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-3); }
+    .sw { border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); overflow: hidden; background: var(--color-surface-raised); }
+    .sw .chip { height: 56px; border-bottom: 1px solid var(--color-border-subtle); }
+    .sw .meta { padding: var(--space-2) var(--space-3); font-size: var(--font-size-caption); line-height: 17px; }
+    .sw .meta b { display: block; font-size: var(--font-size-small); font-weight: var(--font-weight-semibold); }
+    .sw .meta code, code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; color: var(--color-text-secondary); }
+    .state-grid { display: grid; grid-template-columns: 140px repeat(6, minmax(0, 1fr)); gap: var(--space-3) var(--space-4); align-items: center; }
+    .state-grid .h { font-size: var(--font-size-caption); color: var(--color-text-tertiary); font-weight: var(--font-weight-semibold); }
+    .state-grid .rowlbl { font-size: var(--font-size-small); font-weight: var(--font-weight-semibold); }
+    .demo-box { background: var(--color-surface-raised); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); padding: var(--space-6); overflow-x: auto; }
+    .tok { font-size: var(--font-size-caption); color: var(--color-text-tertiary); }
+    .scale-row { display: grid; grid-template-columns: 160px 80px 1fr; gap: var(--space-4); align-items: center; padding: var(--space-2) 0; border-top: 1px solid var(--color-border-subtle); }
+    .scale-row:first-child { border-top: 0; }
+    .bar { height: 12px; border-radius: 2px; background: var(--color-action-primary); }
+    .radius-demo { width: 72px; height: 56px; background: var(--color-surface-selected); border: 1px solid var(--color-border-default); }
+    .elev-demo { height: 84px; border-radius: var(--radius-lg); background: var(--color-surface-raised); display: grid; place-items: center; font-size: var(--font-size-small); color: var(--color-text-secondary); }
+    .motion-demo { width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-action-primary); }
+    .motion-track { position: relative; height: 44px; background: var(--color-surface-sunken); border-radius: var(--radius-md); }
+    .motion-track .motion-demo { position: absolute; left: 0; top: 0; transition-property: transform; }
+    .motion-track.go .motion-demo { transform: translateX(calc(100% * 6)); }
+    .bp { display: grid; gap: var(--space-2); }
+    .bp-bar { position: relative; height: 34px; border-radius: var(--radius-md); background: var(--color-surface-sunken); overflow: hidden; }
+    .bp-bar span { position: absolute; top: 0; bottom: 0; display: grid; place-items: center; font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); color: var(--color-text-on-action); border-right: 2px solid var(--color-surface-raised); }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+    .rules { margin: 0; padding-left: var(--space-5); color: var(--color-text-secondary); display: grid; gap: var(--space-2); }
+    .rules b { color: var(--color-text-primary); }
+    .do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    .do-dont > div { border-radius: var(--radius-md); padding: var(--space-4); font-size: var(--font-size-small); }
+    .do { background: var(--color-status-success-bg); color: var(--color-status-success); }
+    .dont { background: var(--color-status-critical-bg); color: var(--color-status-critical); }
+    .do b, .dont b { display: block; margin-bottom: var(--space-1); }
+    @media (max-width: 860px) {
+      .ds { grid-template-columns: 1fr; } .ds-nav { position: static; height: auto; display: none; }
+      .ds-main { padding: var(--space-6) var(--space-4); } .state-grid { grid-template-columns: 110px repeat(6, 120px); } .two, .do-dont { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="ds">
+  <nav class="ds-nav" aria-label="Isi">
+    <div class="brand"><span class="brand-mark" id="logo"></span><div><div class="brand-word">fluxora</div><div class="brand-for">Sistem desain v1.0</div></div></div>
+    <a href="#prinsip">Prinsip</a><a href="#logo">Logo</a>
+    <div class="grp">Fondasi</div>
+    <a href="#warna">Warna</a><a href="#tipografi">Tipografi</a><a href="#spasi">Spasi & layout</a><a href="#radius">Radius & elevasi</a><a href="#gerak">Gerak</a><a href="#breakpoint">Breakpoint</a>
+    <div class="grp">Komponen</div>
+    <a href="#button">Tombol</a><a href="#input">Input</a><a href="#seleksi">Tab & segmen</a><a href="#status">Status & tag</a><a href="#sel-ukuran">Sel ukuran</a><a href="#tabel">Baris tabel</a><a href="#nav">Navigasi</a><a href="#umpan-balik">Toast & callout</a>
+    <div class="grp">Lainnya</div>
+    <a href="#aksesibilitas">Aksesibilitas</a><a href="../index.html">Buka aplikasi</a>
+  </nav>
+
+  <main class="ds-main">
+    <header class="ds-hero">
+      <h1>Sistem desain Fluxora</h1>
+      <p>Fondasi visual dan komponen untuk aplikasi stok dan pesanan Beckycoo. Semua nilai di halaman ini dibaca langsung dari <code>css/tokens.css</code>, jadi yang Anda lihat sama persis dengan yang dipakai aplikasi. Spesifikasi teknis lengkap ada di <code>docs/HANDOFF.md</code>; token mesin di <code>tokens.json</code>.</p>
+    </header>
+
+    <section class="s" id="prinsip">
+      <h2>Prinsip</h2>
+      <ol class="rules">
+        <li><b>Angka stok adalah pahlawannya.</b> Satu-satunya elemen yang boleh mencolok adalah sel ukuran (label tenun). Semua yang lain tenang.</li>
+        <li><b>Warna berarti sesuatu.</b> Denim untuk aksi, oranye dan hijau hanya untuk identitas Shopee dan Tokopedia, merah/kuning/hijau hanya untuk status. Tidak ada warna dekoratif.</li>
+        <li><b>Status tidak pernah hanya warna.</b> Setiap status membawa ikon atau teks. Tokopedia juga punya penanda bentuk (wajik) dan tekstur garis di grafik.</li>
+        <li><b>Setiap klik dijawab.</b> Tekan, sibuk, selesai: tombol bergeser 1px saat ditekan, menampilkan spinner saat bekerja, toast saat selesai.</li>
+        <li><b>Gerak menjelaskan perubahan, bukan menghias.</b> Hanya transform dan opacity yang dianimasikan. Gerak yang berjalan sendiri hanya ada di dua tempat: intro fluks (sekali per sesi, bisa dilewati) dan ilustrasi label di halaman login.</li>
+      </ol>
+    </section>
+
+
+    <section class="s" id="logo">
+      <h2>Logo</h2>
+      <p>Tiga garis fluks membentuk huruf F. Dua garis putih menyapu ke lengan atas; garis kuning memisah ke lengan tengah: satu sumber stok mengalir ke dua kanal. Geometri tunggal ada di <code>FX.MARK</code> (<code>js/intro.js</code>) dan dipakai logo, favicon, serta animasi intro.</p>
+      <div class="two">
+        <div class="demo-box" style="background:var(--color-surface-inverse);display:grid;place-items:center;min-height:180px"><img src="../assets/logo/fluxora-lockup-dark.svg" alt="Logo Fluxora, versi gelap" style="height:72px"></div>
+        <div class="demo-box" style="display:grid;place-items:center;min-height:180px"><img src="../assets/logo/fluxora-lockup-light.svg" alt="Logo Fluxora, versi terang" style="height:56px"></div>
+      </div>
+      <div class="demo-box" style="display:flex;gap:var(--space-8);align-items:end;flex-wrap:wrap">
+        <div><img src="../assets/logo/fluxora-mark.svg" width="96" alt=""><p class="tok">Ikon aplikasi 96</p></div>
+        <div><img src="../assets/logo/fluxora-mark.svg" width="48" alt=""><p class="tok">48</p></div>
+        <div><img src="../assets/logo/fluxora-mark.svg" width="24" alt=""><p class="tok">24 (minimum ikon)</p></div>
+        <div><img src="../assets/logo/fluxora-mark-light.svg" width="64" alt=""><p class="tok">Tanpa ubin, di latar terang</p></div>
+        <div style="color:var(--color-text-primary)"><span id="mono-mark"></span><p class="tok">Satu warna</p></div>
+      </div>
+      <table class="t panel"><tbody>
+        <tr><td><b>Konstruksi</b></td><td>Kotak desain 64 unit. Garis 3,6 unit, ujung bulat, jarak antargaris 6 unit. Ubin denim radius 15 unit.</td></tr>
+        <tr><td><b>Ruang bebas</b></td><td>Minimal setinggi lengan tengah (8 unit pada kotak 64) di semua sisi.</td></tr>
+        <tr><td><b>Ukuran minimum</b></td><td>Ikon 16px (favicon memakai garis 4,4 unit agar tetap terbaca); lockup 96px lebar.</td></tr>
+        <tr><td><b>Warna</b></td><td>Garis <code>color-text-on-inverse</code> + cabang <code>color-accent</code> di atas denim; di latar terang garis denim-900 + cabang <code>ref-thread-600</code>; satu warna (<code>currentColor</code>) untuk cetak.</td></tr>
+        <tr><td><b>Jangan</b></td><td>Memutar, memberi bayangan, mengganti warna cabang dengan warna kanal, atau memisahkan garis kuning dari ikatan.</td></tr>
+        <tr><td><b>Berkas</b></td><td><code>assets/logo/</code>: fluxora-mark.svg, fluxora-mark-light.svg, fluxora-mark-mono.svg, fluxora-lockup-dark.svg, fluxora-lockup-light.svg (wordmark sudah dikonversi ke path).</td></tr>
+      </tbody></table>
+    </section>
+
+    <section class="s" id="warna">
+      <h2>Warna</h2>
+      <p>Tiga tingkat token. Komponen hanya boleh membaca token <b>semantik</b> atau <b>komponen</b>, tidak pernah token referensi atau hex mentah. Kontras teks di bawah ini sudah dicek terhadap WCAG 2.2 AA.</p>
+      <h3 class="sub">Permukaan</h3><div class="swatches" data-sw="color-surface-canvas color-surface-raised color-surface-sunken color-surface-hover color-surface-selected color-surface-inverse color-surface-inverse-raised"></div>
+      <h3 class="sub">Teks</h3><div class="swatches" data-sw="color-text-primary:17.2 color-text-secondary:7.4 color-text-tertiary:4.96 color-text-disabled color-text-link:7.9 color-text-on-inverse-muted:8.1"></div>
+      <h3 class="sub">Garis</h3><div class="swatches" data-sw="color-border-subtle color-border-default color-border-strong:3.1 color-border-focus:5.7"></div>
+      <h3 class="sub">Aksi & aksen</h3><div class="swatches" data-sw="color-action-primary color-action-primary-hover color-action-primary-active color-action-danger color-accent"></div>
+      <h3 class="sub">Status</h3><div class="swatches" data-sw="color-status-critical color-status-critical-bg color-status-warning color-status-warning-bg color-status-success color-status-success-bg color-status-info color-status-info-bg"></div>
+      <h3 class="sub">Kanal (identitas data)</h3><div class="swatches" data-sw="color-channel-shopee color-channel-shopee-text:5.0 color-channel-tokopedia color-channel-tokopedia-text:5.4"></div>
+      <div class="callout">Pasangan oranye–hijau dipertahankan agar sesuai merek Shopee dan Tokopedia. Validator palet menunjukkan jarak bagi pembaca buta warna protan hanya ΔE 7,9, jadi <b>Tokopedia wajib memakai penanda kedua</b>: bentuk wajik di tag, tekstur garis di grafik, dan nama kanal tertulis.</div>
+    </section>
+
+    <section class="s" id="tipografi">
+      <h2>Tipografi</h2>
+      <p>Satu keluarga: <b>Hanken Grotesk</b> (OFL, di-host sendiri di <code>fonts/</code>). Angka memakai figur tabular di seluruh aplikasi supaya kolom angka lurus; Hanken dipilih karena tanda baca tetap rapat saat figur tabular aktif. Judul memakai tracking −0,02em.</p>
+      <div class="demo-box" id="type-scale"></div>
+    </section>
+
+    <section class="s" id="spasi">
+      <h2>Spasi & layout</h2>
+      <p>Basis 4px. Padding panel 20px, jarak antarpanel 24px, gutter halaman 32px di desktop dan 16px di ponsel. Lebar konten maksimal 1360px; sidebar 248px.</p>
+      <div class="demo-box" id="space-scale"></div>
+      <div class="two">
+        <div class="demo-box"><b>Struktur layar</b><pre style="margin:var(--space-3) 0 0;font-size:12px;line-height:16px;color:var(--color-text-secondary)">┌──────────┬──────────────────────────────────┐
+│ sidebar  │ topbar  72px  judul · simulasi · │
+│ 248px    ├──────────────────────────────────┤
+│ denim    │ view  padding 24 / 32            │
+│          │  ┌ strip KPI (1 permukaan) ────┐ │
+│ nav 40px │  └─────────────────────────────┘ │
+│          │  ┌ panel 2fr ───┐ ┌ panel 1fr ┐  │
+│ user     │  └──────────────┘ └───────────┘  │
+└──────────┴──────────────────────────────────┘</pre></div>
+        <div class="demo-box"><b>Aturan</b><ul class="rules" style="margin-top:var(--space-3)"><li>Konten rata kiri; angka rata kanan di tabel.</li><li>Grid 2 kolom: 2fr/1fr untuk utama + samping, 1fr/1fr untuk setara.</li><li>KPI selalu satu permukaan dengan pemisah, bukan kartu-kartu terpisah.</li><li>Tidak ada nilai spasi di luar skala.</li></ul></div>
+      </div>
+    </section>
+
+    <section class="s" id="radius">
+      <h2>Radius & elevasi</h2>
+      <p>Hierarki radius mengikuti ukuran objek: semakin besar objek, semakin bulat. Bayangan diwarnai denim, tidak pernah hitam murni.</p>
+      <div class="demo-box" style="display:flex;gap:var(--space-6);flex-wrap:wrap" id="radius-demo"></div>
+      <div class="two" style="grid-template-columns:repeat(3,1fr)">
+        <div><div class="elev-demo" style="box-shadow:var(--elevation-1);border:1px solid var(--color-border-subtle)">elevation-1</div><p class="tok">Panel, strip KPI, segmen aktif</p></div>
+        <div><div class="elev-demo" style="box-shadow:var(--elevation-2)">elevation-2</div><p class="tok">Toast, tooltip</p></div>
+        <div><div class="elev-demo" style="box-shadow:var(--elevation-3)">elevation-3</div><p class="tok">Drawer (bayangan ke kiri)</p></div>
+      </div>
+    </section>
+
+    <section class="s" id="gerak">
+      <h2>Gerak</h2>
+      <p>Hanya <code>transform</code>, <code>opacity</code>, dan transisi warna. Layout tidak pernah dianimasikan. Saat <code>prefers-reduced-motion: reduce</code>, semua durasi menjadi 0ms lewat token.</p>
+      <div class="demo-box" style="display:grid;gap:var(--space-4)" id="motion-demo"></div>
+      <table class="t panel"><thead><tr><th>Token</th><th>Nilai</th><th>Dipakai untuk</th></tr></thead><tbody>
+        <tr><td><code>motion-duration-instant</code></td><td data-v="motion-duration-instant"></td><td>Tekan tombol (translateY 1px)</td></tr>
+        <tr><td><code>motion-duration-fast</code></td><td data-v="motion-duration-fast"></td><td>Hover, perubahan warna, fokus</td></tr>
+        <tr><td><code>motion-duration-base</code></td><td data-v="motion-duration-base"></td><td>Toast masuk/keluar, scrim, pergantian layar</td></tr>
+        <tr><td><code>motion-duration-slow</code></td><td data-v="motion-duration-slow"></td><td>Drawer masuk, angka di ilustrasi login</td></tr>
+        <tr><td><code>motion-duration-emphasis</code></td><td data-v="motion-duration-emphasis"></td><td>Sorotan sel stok yang baru berubah</td></tr>
+        <tr><td><code>motion-ease-standard / enter / exit</code></td><td colspan="2" data-v="motion-ease-standard"></td></tr>
+      </tbody></table>
+    </section>
+
+    <section class="s" id="breakpoint">
+      <h2>Breakpoint</h2>
+      <div class="demo-box bp">
+        <div class="bp-bar"><span style="left:0;width:22%;background:var(--ref-denim-300);color:var(--color-text-primary)">&lt; 640 ponsel</span><span style="left:22%;width:18%;background:var(--ref-denim-600)">640–859</span><span style="left:40%;width:22%;background:var(--ref-denim-700)">860–1179 tablet</span><span style="left:62%;width:18%;background:var(--ref-denim-800)">1180–1439</span><span style="left:80%;width:20%;background:var(--ref-denim-900)">≥ 1440</span></div>
+        <table class="t" style="margin-top:var(--space-3)"><tbody>
+          <tr><td><b>&lt; 640</b></td><td>Pencarian penuh lebar, simulasi bisa digeser horizontal, deskripsi akun demo disembunyikan.</td></tr>
+          <tr><td><b>&lt; 860</b></td><td>Sidebar menjadi bar atas dengan menu geser horizontal; kartu pengguna & status sinkron disembunyikan; KPI 2 kolom; form 1 kolom; drawer layar penuh tanpa radius; login satu kolom tanpa ilustrasi.</td></tr>
+          <tr><td><b>&lt; 1180</b></td><td>Grid 2 kolom menumpuk jadi 1; KPI 3 kolom; label "Simulasi" disembunyikan.</td></tr>
+          <tr><td><b>≥ 1440</b></td><td>Konten berhenti melebar di 1360px.</td></tr>
+        </tbody></table>
+      </div>
+    </section>
+
+    <section class="s" id="button">
+      <h2>Tombol</h2>
+      <p>Empat varian, tiga ukuran (sm 32, md 36, lg 44). Label berupa kata kerja yang menyebut hasilnya: “Serahkan kurir”, bukan “Submit”. Satu tombol primer per area.</p>
+      <div class="demo-box"><div class="state-grid" id="btn-states"></div></div>
+    </section>
+
+    <section class="s" id="input">
+      <h2>Input</h2>
+      <p>Tinggi 36px (44px di login dan input jumlah ukuran). Label selalu di atas, tidak memakai placeholder sebagai label. Pesan error di bawah field, dengan ikon, dan field diberi <code>aria-invalid</code>.</p>
+      <div class="demo-box"><div class="state-grid" id="input-states" style="grid-template-columns:140px repeat(5,minmax(0,1fr))"></div></div>
+    </section>
+
+    <section class="s" id="seleksi">
+      <h2>Tab & kontrol segmen</h2>
+      <p><b>Tab</b> mengganti kumpulan data (status pesanan) dan menampilkan jumlah. <b>Segmen</b> menyaring tampilan yang sama (kanal, rentang waktu).</p>
+      <div class="demo-box" style="display:grid;gap:var(--space-5)">
+        <div class="tabs"><button class="on">Perlu dikemas <span class="n">9</span></button><button>Siap kirim <span class="n">2</span></button><button>Di kurir <span class="n">2</span></button><button>Selesai <span class="n">1</span></button></div>
+        <div class="seg"><button class="on">Semua kanal</button><button>Shopee</button><button>Tokopedia</button></div>
+      </div>
+    </section>
+
+    <section class="s" id="status">
+      <h2>Status & tag</h2>
+      <div class="demo-box" style="display:grid;gap:var(--space-5)">
+        <div><div class="lbl" style="margin-bottom:var(--space-2)">Level (selalu dengan ikon)</div><div class="btns" id="lvls"></div></div>
+        <div><div class="lbl" style="margin-bottom:var(--space-2)">Status pesanan (bentuk penanda berbeda per status)</div><div class="btns" style="gap:var(--space-5)"><span class="st baru">Perlu dikemas</span><span class="st dikemas">Siap kirim</span><span class="st dikirim">Di kurir</span><span class="st selesai">Selesai</span><span class="st batal">Dibatalkan</span></div></div>
+        <div><div class="lbl" style="margin-bottom:var(--space-2)">Tag kanal</div><div class="btns"><span class="ch shopee">Shopee</span><span class="ch tokopedia">Tokopedia</span><span class="ch all">Semua</span></div></div>
+        <div><div class="lbl" style="margin-bottom:var(--space-2)">Tenggat serah kurir</div><div class="btns" style="gap:var(--space-5)"><span class="deadline">18j 20m</span><span class="deadline soon">2j 11m</span><span class="deadline late">telat 36m</span></div></div>
+      </div>
+    </section>
+
+    <section class="s" id="sel-ukuran">
+      <h2>Sel ukuran (label tenun)</h2>
+      <p>Elemen khas Fluxora. Meniru label ukuran yang dijahit di kerah: kotak kecil dengan jahitan putus-putus. Dipakai hanya untuk <b>jumlah stok</b>, tidak untuk angka lain.</p>
+      <div class="demo-box"><table class="t matrix" style="width:auto"><thead><tr><th></th><th class="c">Aman</th><th class="c">Menipis</th><th class="c">Habis</th><th class="c">Dalam produksi</th><th class="c">Baru berubah</th><th class="c">Input opname</th></tr></thead><tbody><tr><td class="tok">.cell</td>
+        <td class="cell"><span class="q">14</span></td><td class="cell lo"><span class="q">2</span></td><td class="cell zero"><span class="q">0</span></td><td class="cell"><span class="q">5</span><span class="inc">+14</span></td><td class="cell flash" id="flash-demo"><span class="q">13</span></td><td class="cell"><input class="q-input" value="9" aria-label="Contoh input opname"></td></tr></tbody></table>
+        <p class="tok" style="margin:var(--space-3) 0 0">Ambang menipis = <code>settings.lowStock</code> (default 3). Kata “habis” dicetak di dalam sel supaya tidak bergantung warna. Sorotan “baru berubah” memakai warna aksen benang selama <code>motion-duration-emphasis</code>. <button class="btn sm" id="replay-flash" type="button">Putar ulang sorotan</button></p>
+      </div>
+    </section>
+
+    <section class="s" id="tabel">
+      <h2>Baris tabel</h2>
+      <div class="panel"><table class="t"><thead><tr><th>Status</th><th>Barang</th><th class="r">Total</th></tr></thead><tbody>
+        <tr><td class="tok">default</td><td>Kaos Oversize Sunday, Hitam</td><td class="r">40</td></tr>
+        <tr class="row-link is-hover"><td class="tok">hover</td><td>Kaos Oversize Sunday, Broken White</td><td class="r">52</td></tr>
+        <tr class="row-link is-selected"><td class="tok">selected</td><td>Kemeja Linen Pagi, Sage</td><td class="r">36</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section class="s" id="nav">
+      <h2>Navigasi samping</h2>
+      <div class="demo-box" style="background:var(--color-surface-inverse);max-width:280px"><nav class="nav" style="padding:0" id="nav-demo"></nav></div>
+    </section>
+
+    <section class="s" id="umpan-balik">
+      <h2>Toast & callout</h2>
+      <div class="two">
+        <div class="demo-box" style="display:grid;gap:var(--space-2)">
+          <div class="toast" style="animation:none"><span class="tk">Pesanan Shopee</span><span>Kaos Oversize Sunday M terjual. Stok sekarang 13, listing Tokopedia ikut diperbarui.</span></div>
+          <div class="toast bad" style="animation:none"><span class="tk">Overselling dicegah</span><span>Checkout di Tokopedia ditahan karena stok 0 di semua kanal.</span></div>
+          <p class="tok">Pojok kanan bawah, maks. 3 tumpuk, hilang setelah 4,2 detik. <code>role="status"</code>, <code>aria-live="polite"</code>. Judul toast = nama aksi yang sama dengan tombolnya.</p>
+        </div>
+        <div class="demo-box" style="display:grid;gap:var(--space-3)">
+          <div class="callout"><b>4 model</b> sudah di bawah titik pesan.</div>
+          <div class="callout critical" role="alert"><b>1 pesanan lewat batas serah kurir.</b> Serahkan sekarang atau hubungi pembeli.</div>
+          <div class="readonly-bar">Mode lihat. Staf bisa mencocokkan stok dan melapor ke PIC.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="s" id="aksesibilitas">
+      <h2>Aksesibilitas</h2>
+      <ul class="rules">
+        <li><b>Fokus terlihat</b> di semua elemen interaktif: cincin 2px <code>color-border-focus</code> dengan jarak 2px (<code>--focus-ring</code>), hanya untuk <code>:focus-visible</code>.</li>
+        <li><b>Kontras</b>: teks ≥ 4,5:1, garis input dan ikon ≥ 3:1. Teks tersier dibatasi ke #687083 (4,54:1 di kanvas).</li>
+        <li><b>Status</b> selalu ikon + teks. Kanal selalu nama + bentuk penanda.</li>
+        <li><b>Drawer</b>: <code>role="dialog"</code>, <code>aria-modal</code>, fokus ke input pertama, tutup dengan Esc atau klik scrim.</li>
+        <li><b>Navigasi aktif</b> memakai <code>aria-current="page"</code>; tombol Live memakai <code>aria-pressed</code>.</li>
+        <li><b>Gerak</b> dihormati lewat <code>prefers-reduced-motion</code> di level token.</li>
+      </ul>
+      <div class="do-dont"><div class="do"><b>Lakukan</b>“Kata sandi salah. Untuk prototipe ini, kata sandinya beckycoo.”</div><div class="dont"><b>Hindari</b>“Oops! Terjadi kesalahan.” Pesan error menjelaskan apa yang salah dan cara memperbaikinya, tanpa minta maaf.</div></div>
+    </section>
+  </main>
+</div>
+
+<script src="../js/util.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/intro.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+(function () {
+  const FX = window.FX, ui = FX.ui;
+  const css = getComputedStyle(document.documentElement);
+  const v = (n) => css.getPropertyValue('--' + n).trim();
+  document.getElementById('logo').innerHTML = FX.logo(36);
+  document.getElementById('mono-mark').innerHTML = FX.logo(64, { tile: false, line: 'currentColor', branch: 'currentColor' });
+
+  // Swatches: values come from the live CSS, so the page cannot drift from tokens.css
+  document.querySelectorAll('[data-sw]').forEach((el) => {
+    el.innerHTML = el.dataset.sw.split(' ').map((t) => {
+      const [name, ratio] = t.split(':');
+      return '<div class="sw"><div class="chip" style="background:var(--' + name + ')"></div><div class="meta"><b>' + name.replace('color-', '') + '</b><code>--' + name + '</code><br>' + v(name) + (ratio ? ', kontras ' + ratio.replace('.', ',') + ':1' : '') + '</div></div>';
+    }).join('');
+  });
+
+  const types = [['display', 'display', 'Satu angka stok', 'Judul login'], ['heading', 'bold', 'Ringkasan', 'Judul halaman (h1)'], ['metric', 'bold', 'Rp59,6 jt', 'Nilai KPI'], ['title', 'bold', 'Kaos Oversize Sunday', 'Judul drawer'], ['title-sm', 'semibold', 'Omzet harian', 'Judul panel (h2)'], ['body', 'regular', 'Pesanan dari dua marketplace dalam satu antrean', 'Teks dasar, sel tabel'], ['small', 'medium', 'Batas serah kurir 2j 11m', 'Label field, teks pendukung'], ['caption', 'semibold', 'Laku / mgg', 'Kepala tabel, badge, waktu']];
+  document.getElementById('type-scale').innerHTML = types.map(([k, w, s, use]) =>
+    '<div class="scale-row" style="grid-template-columns:200px 1fr"><div class="tok"><b style="color:var(--color-text-primary)">' + k + '</b><br>' + v('font-size-' + k) + ' / ' + v('line-height-' + k) + ', ' + w + '<br>' + use + '</div><div style="font-size:var(--font-size-' + k + ');line-height:var(--line-height-' + k + ');font-weight:var(--font-weight-' + w + ');' + (['display', 'heading', 'metric', 'title'].includes(k) ? 'letter-spacing:var(--letter-spacing-tight)' : '') + '">' + s + '</div></div>').join('');
+
+  document.getElementById('space-scale').innerHTML = [1, 2, 3, 4, 5, 6, 8, 10, 12, 16].map((n) =>
+    '<div class="scale-row"><code>--space-' + n + '</code><span class="tok">' + v('space-' + n) + '</span><div class="bar" style="width:var(--space-' + n + ')"></div></div>').join('');
+
+  document.getElementById('radius-demo').innerHTML = [['xs', 'Tag, badge, sel ukuran'], ['sm', 'Item segmen, thumbnail'], ['md', 'Tombol, input, toast'], ['lg', 'Panel'], ['xl', 'Drawer, kartu login'], ['pill', 'Penghitung']].map(([k, u]) =>
+    '<div><div class="radius-demo" style="border-radius:var(--radius-' + k + ')"></div><div class="tok" style="margin-top:6px"><b style="color:var(--color-text-primary)">radius-' + k + '</b> ' + v('radius-' + k) + '<br>' + u + '</div></div>').join('');
+
+  document.getElementById('motion-demo').innerHTML = [['fast', 'standard'], ['base', 'enter'], ['slow', 'enter']].map(([d, e]) =>
+    '<div style="display:grid;grid-template-columns:200px 1fr;gap:var(--space-4);align-items:center"><span class="tok"><b style="color:var(--color-text-primary)">' + d + '</b> ' + v('motion-duration-' + d) + ', ease-' + e + '</span><div class="motion-track"><div class="motion-demo" style="transition-duration:var(--motion-duration-' + d + ');transition-timing-function:var(--motion-ease-' + e + ')"></div></div></div>').join('') +
+    '<div><button class="btn sm" id="play" type="button">Putar contoh</button></div>';
+  document.getElementById('play').onclick = () => document.querySelectorAll('.motion-track').forEach((t) => t.classList.toggle('go'));
+  document.querySelectorAll('[data-v]').forEach((td) => (td.textContent = v(td.dataset.v) + (td.dataset.v === 'motion-ease-standard' ? '  /  ' + v('motion-ease-enter') + '  /  ' + v('motion-ease-exit') : '')));
+
+  // Button states, rendered with the real classes. Hover/active/focus use the .is-* mirrors.
+  const states = [['Default', ''], ['Hover', 'is-hover'], ['Active', 'is-active'], ['Focus', 'is-focus'], ['Disabled', 'is-disabled'], ['Loading', 'is-loading']];
+  const variants = [['Primer', 'primary', 'Serahkan kurir'], ['Sekunder', '', 'Kemas'], ['Ghost', 'ghost', 'Buka forecast'], ['Bahaya', 'danger', 'Batalkan pesanan']];
+  document.getElementById('btn-states').innerHTML = '<span></span>' + states.map((s) => '<span class="h">' + s[0] + '</span>').join('') +
+    variants.map(([n, cls, label]) => '<span class="rowlbl">' + n + '<br><span class="tok">.btn' + (cls ? '.' + cls : '') + '</span></span>' + states.map((s) => '<span><button type="button" class="btn sm ' + cls + ' ' + s[1] + '"' + (s[1] === 'is-disabled' ? ' disabled' : '') + (s[1] === 'is-loading' ? ' aria-busy="true"' : '') + '>' + label + '</button></span>').join('')).join('');
+
+  const istates = [['Default', ''], ['Hover', 'is-hover'], ['Focus', 'is-focus'], ['Disabled', 'disabled'], ['Error', 'is-error']];
+  document.getElementById('input-states').innerHTML = '<span></span>' + istates.map((s) => '<span class="h">' + s[0] + '</span>').join('') +
+    '<span class="rowlbl">Teks<br><span class="tok">.field input</span></span>' + istates.map((s) => '<label class="field' + (s[1] === 'is-error' ? ' is-error' : '') + '"><span>Email</span><input class="input ' + (s[1] !== 'disabled' ? s[1] : '') + '" value="' + (s[1] === 'is-error' ? 'owner@beckyco.id' : 'owner@beckycoo.id') + '"' + (s[1] === 'disabled' ? ' disabled' : '') + (s[1] === 'is-error' ? ' aria-invalid="true"' : '') + '>' + (s[1] === 'is-error' ? '<span class="err">' + ui.icon('stop', 13) + 'Email tidak terdaftar.</span>' : '<span class="hint">Akun tim Beckycoo</span>') + '</label>').join('');
+
+  document.getElementById('lvls').innerHTML = [['critical', 'Lewat batas'], ['serious', 'Habis'], ['warning', 'Menipis'], ['good', 'Aman'], ['info', 'Otomatis'], ['neutral', 'Batal']].map(([l, t]) => ui.lvl(l, t)).join('');
+
+  document.getElementById('nav-demo').innerHTML =
+    '<a>' + ui.icon('home', 18) + '<span>Default</span></a>' +
+    '<a class="is-hover">' + ui.icon('grid', 18) + '<span>Hover</span></a>' +
+    '<a class="on" style="margin-left:12px">' + ui.icon('bag', 18) + '<span>Aktif</span><span class="cnt crit">9</span></a>' +
+    '<a>' + ui.icon('trend', 18) + '<span>Dengan hitungan</span><span class="cnt">4</span></a>';
+
+  document.getElementById('replay-flash').onclick = () => { const c = document.getElementById('flash-demo'); c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash'); };
+})();
+</script>
+</body>
+</html>

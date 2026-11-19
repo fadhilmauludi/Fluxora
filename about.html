@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tentang Fluxora — Tim Kelompok 5</title>
+  <meta name="description" content="Fluxora: sistem sinkronisasi stok dan pencatatan pesanan untuk Beckycoo. Dibuat oleh Kelompok 5.">
+  <link rel="icon" href="assets/logo/fluxora-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/app.css">
+  <style>
+    body { background: var(--color-surface-canvas); }
+    .ab-top { position: sticky; top: 0; z-index: var(--z-sticky); display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-8); background: rgb(24 33 58 / 0.96); backdrop-filter: blur(8px); color: var(--color-text-on-inverse); }
+    .ab-top .brand { padding: 0; }
+    .ab-top nav { display: flex; gap: var(--space-1); margin-left: var(--space-6); }
+    .ab-top nav a { color: var(--color-text-on-inverse-muted); text-decoration: none; font-size: var(--font-size-small); font-weight: var(--font-weight-medium); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); }
+    .ab-top nav a:hover { background: var(--color-surface-inverse-raised); color: var(--color-text-on-inverse); }
+    .ab-top .spacer { flex: 1; }
+    .ab-top .btn.primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--ref-denim-950); }
+    .ab-top .btn.primary:hover { background: var(--ref-thread-600); border-color: var(--ref-thread-600); }
+
+    .ab-hero { background: var(--color-surface-inverse); color: var(--color-text-on-inverse); padding: var(--space-16) var(--space-8) var(--space-12); }
+    .ab-hero-in { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(240px, 1fr); gap: var(--space-12); align-items: center; }
+    .ab-kicker { font-size: var(--font-size-small); color: var(--color-text-on-inverse-muted); }
+    .ab-hero h1 { font-size: 52px; line-height: 54px; font-weight: var(--font-weight-display); letter-spacing: -0.03em; margin-top: var(--space-3); max-width: 16ch; }
+    .ab-hero p { color: var(--color-text-on-inverse-muted); font-size: var(--font-size-title-sm); line-height: 26px; max-width: 56ch; margin: var(--space-5) 0 0; }
+    .ab-meta { display: flex; flex-wrap: wrap; gap: var(--space-6); margin-top: var(--space-8); font-size: var(--font-size-small); }
+    .ab-meta div span { display: block; color: var(--color-text-on-inverse-muted); font-size: var(--font-size-caption); }
+    .ab-meta b { font-weight: var(--font-weight-semibold); }
+    .ab-mark { justify-self: center; }
+    .ab-mark svg { width: min(280px, 60vw); height: auto; display: block; }
+
+    .ab-main { max-width: 1120px; margin: 0 auto; padding: var(--space-12) var(--space-8) var(--space-16); display: grid; gap: var(--space-16); }
+    .ab-sec { display: grid; gap: var(--space-6); scroll-margin-top: 88px; }
+    .ab-sec > header h2 { font-size: 32px; line-height: 38px; font-weight: var(--font-weight-bold); letter-spacing: -0.02em; }
+    .ab-sec > header p { color: var(--color-text-secondary); max-width: 64ch; margin: var(--space-2) 0 0; font-size: var(--font-size-title-sm); line-height: 24px; }
+
+    .team { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-5); }
+    .member { background: var(--color-surface-raised); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); box-shadow: var(--elevation-1); padding: var(--space-5); display: grid; gap: var(--space-3); align-content: start; }
+    .member .av { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font-weight: var(--font-weight-bold); font-size: var(--font-size-title-sm); background: var(--color-surface-selected); color: var(--color-action-primary); }
+    .member.lead .av { background: var(--color-accent); color: var(--ref-denim-950); }
+    .member .nm { font-size: var(--font-size-title-sm); line-height: 22px; font-weight: var(--font-weight-bold); }
+    .member .id { font-size: var(--font-size-caption); color: var(--color-text-tertiary); margin-top: 2px; }
+    .member .role { justify-self: start; }
+    .member p { margin: 0; font-size: var(--font-size-small); line-height: var(--line-height-small); color: var(--color-text-secondary); }
+    .member .out { border-top: 1px solid var(--color-border-subtle); padding-top: var(--space-3); }
+    .member .out b { display: block; font-size: var(--font-size-caption); color: var(--color-text-tertiary); font-weight: var(--font-weight-semibold); margin-bottom: var(--space-1); }
+
+    .advisor { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5); background: var(--color-surface-raised); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); }
+    .advisor .av { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--color-surface-inverse); color: var(--color-text-on-inverse); font-weight: var(--font-weight-bold); font-size: var(--font-size-small); }
+
+    .roots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
+    .root { padding: var(--space-5); border-radius: var(--radius-lg); background: var(--color-surface-raised); border: 1px solid var(--color-border-subtle); display: grid; gap: var(--space-2); align-content: start; }
+    .root .ic { width: 36px; height: 36px; border-radius: var(--radius-md); display: grid; place-items: center; background: var(--color-status-critical-bg); color: var(--color-status-critical); }
+    .root h3, .fn h3 { font-size: var(--font-size-title-sm); line-height: 22px; font-weight: var(--font-weight-semibold); }
+    .root p, .fn p { margin: 0; color: var(--color-text-secondary); font-size: var(--font-size-small); line-height: 20px; }
+    .who { width: 100%; }
+    .who td:first-child { font-weight: var(--font-weight-semibold); white-space: nowrap; width: 160px; }
+
+    .vision { background: var(--color-surface-inverse); color: var(--color-text-on-inverse); border-radius: var(--radius-xl); padding: var(--space-10) var(--space-10); }
+    .vision blockquote { margin: 0; font-size: 22px; line-height: 34px; font-weight: var(--font-weight-medium); letter-spacing: -0.005em; max-width: 62ch; }
+    .vision blockquote b { color: var(--color-accent); font-weight: var(--font-weight-semibold); }
+    .vision cite { display: block; margin-top: var(--space-5); color: var(--color-text-on-inverse-muted); font-style: normal; font-size: var(--font-size-small); }
+
+    .fns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
+    .fn { background: var(--color-surface-raised); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); box-shadow: var(--elevation-1); padding: var(--space-6); display: grid; gap: var(--space-3); align-content: start; }
+    .fn .ic { width: 40px; height: 40px; border-radius: var(--radius-md); display: grid; place-items: center; background: var(--color-surface-selected); color: var(--color-action-primary); }
+    .fn .val { border-top: 1px solid var(--color-border-subtle); padding-top: var(--space-3); }
+    .fn .val b { display: block; font-size: var(--font-size-caption); color: var(--color-status-success); font-weight: var(--font-weight-semibold); margin-bottom: var(--space-1); }
+
+    .how { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-5); }
+    .how li { position: relative; padding-top: var(--space-6); }
+    .how li::before { content: ''; position: absolute; top: 15px; left: 40px; right: 0; height: 2px; background: repeating-linear-gradient(90deg, var(--color-border-default) 0 6px, transparent 6px 11px); }
+    .how li:last-child::before { display: none; }
+    .how .n { position: absolute; top: 0; left: 0; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--color-action-primary); color: var(--color-text-on-action); font-weight: var(--font-weight-bold); }
+    .how h3 { font-size: var(--font-size-title-sm); font-weight: var(--font-weight-semibold); margin-top: var(--space-5); }
+    .how p { margin: var(--space-2) 0 0; color: var(--color-text-secondary); font-size: var(--font-size-small); line-height: 20px; }
+
+    .ab-foot { border-top: 1px solid var(--color-border-subtle); padding: var(--space-8); text-align: center; color: var(--color-text-tertiary); font-size: var(--font-size-small); }
+    .ab-foot a { margin: 0 var(--space-2); }
+
+    @media (max-width: 1080px) {
+      .team { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .how { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .how li:nth-child(2)::before { display: none; }
+    }
+    @media (max-width: 860px) {
+      .ab-top { padding: var(--space-3) var(--space-4); } .ab-top nav { display: none; }
+      .ab-hero { padding: var(--space-10) var(--space-5); } .ab-hero-in { grid-template-columns: 1fr; gap: var(--space-8); }
+      .ab-hero h1 { font-size: 36px; line-height: 40px; } .ab-mark { justify-self: start; } .ab-mark svg { width: 140px; }
+      .ab-main { padding: var(--space-8) var(--space-5) var(--space-12); gap: var(--space-12); }
+      .roots, .fns { grid-template-columns: 1fr; } .vision { padding: var(--space-6); } .vision blockquote { font-size: 18px; line-height: 28px; }
+      .who td:first-child { width: auto; }
+    }
+    @media (max-width: 560px) { .team, .how { grid-template-columns: 1fr; } .how li::before { display: none; } }
+  </style>
+</head>
+<body>
+  <header class="ab-top">
+    <a href="index.html" class="brand" style="text-decoration:none;color:inherit"><span class="brand-mark" id="logo"></span><div><div class="brand-word">fluxora</div><div class="brand-for">untuk Beckycoo</div></div></a>
+    <nav aria-label="Bagian halaman"><a href="#tim">Tim</a><a href="#masalah">Masalah</a><a href="#visi">Visi produk</a><a href="#solusi">Solusi</a><a href="#cara-kerja">Cara kerja</a></nav>
+    <span class="spacer"></span>
+    <a class="btn primary sm" href="index.html">Buka aplikasi</a>
+  </header>
+
+  <section class="ab-hero">
+    <div class="ab-hero-in">
+      <div>
+        <div class="ab-kicker">Kelompok 5, MPT</div>
+        <h1>Sistem sinkronisasi stok dan pencatatan pesanan untuk Beckycoo.</h1>
+        <p>Beckycoo adalah brand pakaian lokal untuk pria dan wanita usia 17 sampai 30 tahun. Produksinya dikerjakan maklon, dan penjualannya berjalan di Shopee (kanal utama) dan Tokopedia. Fluxora menyatukan stok, pesanan, dan kas yang sebelumnya dicatat manual di satu spreadsheet.</p>
+        <div class="ab-meta">
+          <div><span>Dosen pengampu</span><b>Andre Parvian Aristio, S.Kom., M.Sc</b></div>
+          <div><span>Mitra</span><b>Beckycoo</b></div>
+          <div><span>Tim</span><b>4 anggota, Scrum</b></div>
+        </div>
+      </div>
+      <div class="ab-mark" id="hero-mark" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <main class="ab-main">
+    <section class="ab-sec" id="tim">
+      <header><h2>Tim Fluxora</h2><p>Dikerjakan dengan Scrum. Setiap peran punya fokus dan hasil kerja yang jelas.</p></header>
+      <div class="team">
+        <article class="member lead">
+          <span class="av">FM</span>
+          <div><div class="nm">Fadhil Mauludi</div><div class="id">NRP 5026251221</div></div>
+          <span class="lvl info role">Product Owner</span>
+          <p>Menjaga arah produk dan kebutuhan Beckycoo, menetapkan prioritas fitur prototipe.</p>
+          <p class="out"><b>Hasil kerja</b>Product backlog dan user story, data dummy yang realistis, skenario uji, hasil validasi dari Beckycoo.</p>
+        </article>
+        <article class="member">
+          <span class="av">CD</span>
+          <div><div class="nm">Chandika Daffa A. R.</div><div class="id">NRP 5026251066</div></div>
+          <span class="lvl info role">Scrum Master</span>
+          <p>Memfasilitasi proses Scrum, menyingkirkan hambatan, serta menjaga ritme dan dokumentasi tim.</p>
+          <p class="out"><b>Hasil kerja</b>Jadwal dan catatan sprint (planning, daily, review, retrospective), dokumentasi proyek, skenario demo.</p>
+        </article>
+        <article class="member">
+          <span class="av">ZN</span>
+          <div><div class="nm">Zafira Najla Rinjani</div><div class="id">NRP 5026251059</div></div>
+          <span class="lvl info role">Developer</span>
+          <p>Tampilan visual dan pembuatan layar prototipe; pengalaman dan alur penggunaan.</p>
+          <p class="out"><b>Hasil kerja</b>Desain visual dan komponen UI, dashboard Owner, layar input barang masuk, tampilan view-only staf.</p>
+        </article>
+        <article class="member">
+          <span class="av">AM</span>
+          <div><div class="nm">Alberto M. P. D. B.</div></div>
+          <span class="lvl info role">Developer</span>
+          <p>Pengalaman dan alur penggunaan serta kemudahan pemakaian; tampilan layar prototipe.</p>
+          <p class="out"><b>Hasil kerja</b>Riset alur kerja pengguna, user flow, wireframe, prototipe interaktif (simulasi pesanan dan notifikasi batas stok), hasil uji usability.</p>
+        </article>
+      </div>
+      <div class="advisor"><span class="av">AP</span><div><div style="font-weight:var(--font-weight-semibold)">Andre Parvian Aristio, S.Kom., M.Sc</div><div class="muted" style="font-size:var(--font-size-small)">Dosen pengampu</div></div></div>
+    </section>
+
+    <section class="ab-sec" id="masalah">
+      <header><h2>Masalah yang diselesaikan</h2><p>Seluruh data stok dan keuangan dicatat manual di satu spreadsheet yang hanya bisa diakses PIC dan tidak terhubung ke Shopee maupun Tokopedia. Masalah utamanya: sinkronisasi pencatatan stok antarplatform dan pencatatan pesanan.</p></header>
+      <div class="roots">
+        <div class="root"><span class="ic" data-ic="grid"></span><h3>Stok tidak terintegrasi</h3><p>Stok dan pesanan dicatat manual di spreadsheet yang tidak terhubung dengan Shopee dan Tokopedia, sehingga muncul selisih 2–3 pcs dan pembatalan pesanan.</p></div>
+        <div class="root"><span class="ic" data-ic="wallet"></span><h3>Keuangan dicocokkan manual</h3><p>Pembukuan dicocokkan tangan dengan data pesanan dan stok, sehingga rawan salah dan arus kas tidak selaras dengan stok nyata.</p></div>
+        <div class="root"><span class="ic" data-ic="trend"></span><h3>Produksi berdasarkan tebakan</h3><p>Rencana stok memakai perkiraan (buffer 5%), padahal produksi lewat maklon punya waktu tunggu.</p></div>
+      </div>
+      <div class="panel scroll-x"><table class="t who"><thead><tr><th>Siapa yang terdampak</th><th>Dampaknya</th></tr></thead><tbody>
+        <tr><td>Tim Gudang</td><td>Kewalahan packing sekaligus memperbarui stok per ukuran per model, lalu mencocokkan stok manual setelah penjualan; sering lembur saat tanggal kembar.</td></tr>
+        <tr><td>Admin Toko</td><td>Chat pelanggan menumpuk, dan stok di platform tidak sama dengan stok asli sehingga pesanan dibatalkan.</td></tr>
+        <tr><td>Keuangan</td><td>Pembukuan tidak sinkron dengan stok, arus kas terpengaruh.</td></tr>
+        <tr><td>Pemilik toko</td><td>Pembatalan menurunkan performa dan rating toko, ditambah kerugian bila stok salah hitung di akhir periode.</td></tr>
+        <tr><td>Pelanggan</td><td>Pesanan dibatalkan karena stok tidak sinkron, lalu memberi rating buruk.</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section class="ab-sec" id="visi">
+      <header><h2>Visi produk</h2></header>
+      <div class="vision">
+        <blockquote>Untuk tim operasional dan pemilik usaha clothing brand Beckycoo yang ingin mengelola stok multi-platform dan pencatatan keuangan secara akurat tanpa proses manual, <b>Fluxora</b> adalah aplikasi web manajemen inventaris dan kas terpusat yang menyinkronkan stok Shopee dan Tokopedia secara real-time serta meminimalkan human error. Berbeda dengan pencatatan manual di spreadsheet terpisah yang rentan selisih data stok dan kas, Fluxora mengotomatiskan pengurangan stok antartoko dan rekap kas dalam satu platform.</blockquote>
+        <cite>Mendukung strategi percepatan operasional gudang, perlindungan rating toko, dan keandalan arus kas bisnis.</cite>
+      </div>
+    </section>
+
+    <section class="ab-sec" id="solusi">
+      <header><h2>Tiga fungsi penting</h2><p>Setiap fungsi menjawab satu akar masalah dan punya nilai bisnis yang terukur.</p></header>
+      <div class="fns">
+        <div class="fn"><span class="ic" data-ic="grid"></span><h3>Pencatatan stok terintegrasi multi-platform</h3><p>Per model dan ukuran S–XL, satu angka stok dipakai Shopee dan Tokopedia sekaligus.</p><p class="val"><b>Nilai bisnis</b>Menghilangkan selisih stok, mencegah overselling dan pembatalan sepihak, melindungi performa dan rating toko.</p></div>
+        <div class="fn"><span class="ic" data-ic="wallet"></span><h3>Pencatatan keuangan otomatis terikat stok</h3><p>Penjualan, biaya platform, dan biaya produksi tercatat dari kejadian stok dan pesanan.</p><p class="val"><b>Nilai bisnis</b>Menghapus salah cocok manual, menyelaraskan arus kas dengan stok nyata, mencegah kerugian internal.</p></div>
+        <div class="fn"><span class="ic" data-ic="trend"></span><h3>Forecasting kebutuhan produksi</h3><p>Rekomendasi jumlah pesanan ke maklon dan safety stock dinamis, menggantikan buffer statis 5%.</p><p class="val"><b>Nilai bisnis</b>Modal kerja tidak mengendap di stok berlebih dan stok tidak habis saat promo besar.</p></div>
+      </div>
+    </section>
+
+    <section class="ab-sec" id="cara-kerja">
+      <header><h2>Bagaimana Fluxora bekerja</h2></header>
+      <ol class="how">
+        <li><span class="n">1</span><h3>Barang masuk</h3><p>PIC mencatat barang masuk per model dan ukuran. Stok langsung bertambah dan biaya produksi tercatat di keuangan.</p></li>
+        <li><span class="n">2</span><h3>Pesanan terhubung</h3><p>Pesanan, pengurangan stok, dan pencatatan keuangan dari Shopee dan Tokopedia masuk langsung ke satu database.</p></li>
+        <li><span class="n">3</span><h3>Gudang memvalidasi</h3><p>Staf melihat pesanan dan stok real-time (view only), mengecek, dan memvalidasi. Ada notifikasi batas serah kurir dan rekomendasi pesanan ke maklon.</p></li>
+        <li><span class="n">4</span><h3>Eksekutif memantau</h3><p>Owner melihat dashboard stok, keuangan, dan forecast untuk memantau kinerja bisnis secara keseluruhan.</p></li>
+      </ol>
+      <div><a class="btn primary" href="index.html">Coba prototipe Fluxora</a></div>
+    </section>
+  </main>
+
+  <footer class="ab-foot">Fluxora, Kelompok 5. <a href="index.html">Aplikasi</a> <a href="docs/design-system.html">Sistem desain</a></footer>
+
+  <script src="js/util.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/intro.js"></script>
+  <script>
+    (function () {
+      document.getElementById('logo').innerHTML = FX.logo(36);
+      document.getElementById('hero-mark').innerHTML = FX.logo(280, { tile: false });
+      document.querySelectorAll('[data-ic]').forEach((el) => (el.innerHTML = FX.ui.icon(el.dataset.ic, 20)));
+    })();
+  </script>
+</body>
+</html>

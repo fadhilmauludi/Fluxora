@@ -1,0 +1,220 @@
+/* ==========================================================================
+   Fluxora design tokens
+   Three tiers (W3C Design Tokens naming, CSS custom properties):
+     1. Reference  --ref-*   raw palette and scales. Never used in components.
+     2. Semantic   --color-*, --space-*, --radius-*, --motion-* ...
+                   purpose-mapped; this is what components read.
+     3. Component  --button-*, --input-*, --cell-* ...
+                   only where a component needs its own knob.
+   Source of truth for tooling: tokens.json (same names, same values).
+   ========================================================================== */
+
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 400; font-display: swap; src: url('../fonts/hanken-grotesk-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 500; font-display: swap; src: url('../fonts/hanken-grotesk-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 600; font-display: swap; src: url('../fonts/hanken-grotesk-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 700; font-display: swap; src: url('../fonts/hanken-grotesk-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 800; font-display: swap; src: url('../fonts/hanken-grotesk-latin-800-normal.woff2') format('woff2'); }
+
+:root {
+  /* ---------------------------------------------------------------- 1. REFERENCE */
+  /* Denim — the brand neutral-dark. Beckycoo is a clothing label; indigo denim is the cloth. */
+  --ref-denim-950: #10172a;
+  --ref-denim-900: #18213a;
+  --ref-denim-800: #24305a;
+  --ref-denim-700: #2f3e72;
+  --ref-denim-600: #3a4e8c;
+  --ref-denim-500: #3d5bd9; /* focus blue: brighter than the cloth so focus is never mistaken for selection */
+  --ref-denim-300: #aeb8d6;
+  --ref-denim-200: #cfd6ea;
+  --ref-denim-100: #e4e9f5;
+  --ref-denim-50:  #f1f4fb;
+
+  /* Slate — cool neutrals with a hint of the denim hue */
+  --ref-slate-0:   #ffffff;
+  --ref-slate-25:  #fafbfc;
+  --ref-slate-50:  #f3f5f8;
+  --ref-slate-100: #eaedf2;
+  --ref-slate-200: #dfe3ea;
+  --ref-slate-300: #c7cdd8;
+  --ref-slate-400: #868ea0;
+  --ref-slate-500: #687083;
+  --ref-slate-600: #4e5668;
+  --ref-slate-800: #262b38;
+  --ref-slate-900: #171b26;
+
+  /* Thread — hang-tag yellow. Used in exactly three places: brand mark, active nav marker, login tag. */
+  --ref-thread-400: #f2c14e;
+  --ref-thread-600: #c99419;
+
+  --ref-red-50:  #fcedeb;  --ref-red-100: #f7d4cf;  --ref-red-600: #b4312a;  --ref-red-700: #962620;
+  --ref-amber-50: #fcf3dc; --ref-amber-100: #f6e1a6; --ref-amber-700: #855400;
+  --ref-green-50: #e6f4ec; --ref-green-100: #c7e6d4; --ref-green-700: #1b6a45;
+
+  /* Marketplace identity (validated pair: CVD ΔE 7.9 → requires secondary encoding, see spec) */
+  --ref-shopee-500: #d9532a;   --ref-shopee-700: #c2471f;
+  --ref-tokopedia-500: #178f4f; --ref-tokopedia-700: #127a43;
+
+  /* Scales */
+  --ref-size-1: 4px;  --ref-size-2: 8px;  --ref-size-3: 12px; --ref-size-4: 16px;
+  --ref-size-5: 20px; --ref-size-6: 24px; --ref-size-8: 32px; --ref-size-10: 40px;
+  --ref-size-12: 48px; --ref-size-16: 64px;
+
+  /* ---------------------------------------------------------------- 2. SEMANTIC */
+  /* Surface */
+  --color-surface-canvas:   var(--ref-slate-50);   /* app background */
+  --color-surface-raised:   var(--ref-slate-0);    /* panels, cards, inputs */
+  --color-surface-sunken:   var(--ref-slate-100);  /* table head, disabled inputs, wells */
+  --color-surface-hover:    var(--ref-slate-25);
+  --color-surface-selected: var(--ref-denim-50);
+  --color-surface-inverse:  var(--ref-denim-900);  /* sidebar, toasts, tooltips */
+  --color-surface-inverse-raised: var(--ref-denim-800);
+  --color-surface-scrim:    rgb(16 23 42 / 0.38);
+
+  /* Text */
+  --color-text-primary:    var(--ref-slate-900);
+  --color-text-secondary:  var(--ref-slate-600);
+  --color-text-tertiary:   var(--ref-slate-500);   /* ≥ 4.5:1 on canvas and raised */
+  --color-text-disabled:   var(--ref-slate-400);
+  --color-text-link:       var(--ref-denim-600);
+  --color-text-on-action:  var(--ref-slate-0);
+  --color-text-on-inverse: var(--ref-slate-0);
+  --color-text-on-inverse-muted: var(--ref-denim-300);
+
+  /* Border */
+  --color-border-subtle:  var(--ref-slate-200);   /* dividers inside panels */
+  --color-border-default: var(--ref-slate-300);   /* panel edges, secondary buttons */
+  --color-border-strong:  var(--ref-slate-400);   /* input edges (≥ 3:1) */
+  --color-border-focus:   var(--ref-denim-500);
+  --color-border-inverse: rgb(255 255 255 / 0.1);
+
+  /* Action / accent */
+  --color-action-primary:         var(--ref-denim-800);
+  --color-action-primary-hover:   var(--ref-denim-700);
+  --color-action-primary-active:  var(--ref-denim-950);
+  --color-action-secondary:       var(--ref-slate-0);
+  --color-action-secondary-hover: var(--ref-slate-50);
+  --color-action-secondary-active:var(--ref-slate-100);
+  --color-action-danger:          var(--ref-red-600);
+  --color-action-danger-hover:    var(--ref-red-700);
+  --color-accent:                 var(--ref-thread-400);
+
+  /* Status — reserved for state; always paired with icon or text, never colour alone */
+  --color-status-critical:    var(--ref-red-600);
+  --color-status-critical-bg: var(--ref-red-50);
+  --color-status-critical-border: var(--ref-red-100);
+  --color-status-warning:     var(--ref-amber-700);
+  --color-status-warning-bg:  var(--ref-amber-50);
+  --color-status-warning-border: var(--ref-amber-100);
+  --color-status-success:     var(--ref-green-700);
+  --color-status-success-bg:  var(--ref-green-50);
+  --color-status-success-border: var(--ref-green-100);
+  --color-status-info:        var(--ref-denim-600);
+  --color-status-info-bg:     var(--ref-denim-50);
+  --color-status-neutral:     var(--ref-slate-600);
+  --color-status-neutral-bg:  var(--ref-slate-100);
+
+  /* Channel (data identity, not status) */
+  --color-channel-shopee:         var(--ref-shopee-500);
+  --color-channel-shopee-text:    var(--ref-shopee-700);
+  --color-channel-tokopedia:      var(--ref-tokopedia-500);
+  --color-channel-tokopedia-text: var(--ref-tokopedia-700);
+
+  /* Typography */
+  --font-family-base: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-display: 800;
+  /* size / line-height pairs (1.25 ratio above body, compact below) */
+  --font-size-caption: 12px;  --line-height-caption: 16px;
+  --font-size-small: 13px;    --line-height-small: 18px;
+  --font-size-body: 14px;     --line-height-body: 20px;
+  --font-size-title-sm: 16px; --line-height-title-sm: 22px;
+  --font-size-title: 20px;    --line-height-title: 26px;
+  --font-size-heading: 24px;  --line-height-heading: 30px;
+  --font-size-metric: 28px;   --line-height-metric: 32px;
+  --font-size-display: 44px;  --line-height-display: 46px;
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+
+  /* Space (4px base) */
+  --space-0: 0;
+  --space-1: var(--ref-size-1);   /* 4  hairline gaps, icon-label */
+  --space-2: var(--ref-size-2);   /* 8  inside compact controls */
+  --space-3: var(--ref-size-3);   /* 12 table cell x, list gaps */
+  --space-4: var(--ref-size-4);   /* 16 panel padding (compact), form gaps */
+  --space-5: var(--ref-size-5);   /* 20 panel padding */
+  --space-6: var(--ref-size-6);   /* 24 between panels */
+  --space-8: var(--ref-size-8);   /* 32 page gutters (desktop) */
+  --space-10: var(--ref-size-10);
+  --space-12: var(--ref-size-12); /* 48 section breaks, login */
+  --space-16: var(--ref-size-16);
+
+  /* Radius — hierarchy by size: the bigger the object, the rounder */
+  --radius-xs: 4px;    /* tags, badges, matrix cells */
+  --radius-sm: 6px;    /* checkboxes, segmented items */
+  --radius-md: 8px;    /* buttons, inputs */
+  --radius-lg: 12px;   /* panels */
+  --radius-xl: 16px;   /* drawer, login card */
+  --radius-pill: 999px;
+
+  /* Elevation — tinted with denim, never pure black */
+  --elevation-0: none;
+  --elevation-1: 0 1px 2px rgb(16 23 42 / 0.05);
+  --elevation-2: 0 10px 28px -8px rgb(16 23 42 / 0.22), 0 2px 6px rgb(16 23 42 / 0.06);
+  --elevation-3: -24px 0 56px -16px rgb(16 23 42 / 0.28);
+  --focus-ring: 0 0 0 2px var(--color-surface-raised), 0 0 0 4px var(--color-border-focus);
+
+  /* Motion — color/opacity/transform only; layout never animates */
+  --motion-duration-instant: 80ms;   /* press feedback */
+  --motion-duration-fast: 120ms;     /* hover, color changes */
+  --motion-duration-base: 180ms;     /* toast, fade */
+  --motion-duration-slow: 260ms;     /* drawer, page-level */
+  --motion-duration-emphasis: 1200ms;/* stock-change highlight */
+  --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --motion-ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Layout */
+  --layout-sidebar-width: 248px;
+  --layout-topbar-height: 72px;
+  --layout-content-max: 1360px;
+  --layout-drawer-width: 560px;
+  /* Breakpoints (documented; CSS media queries cannot read custom properties)
+     --bp-sm: 640px   phone → large phone
+     --bp-md: 860px   sidebar collapses into a top bar
+     --bp-lg: 1180px  two-column grids stack
+     --bp-xl: 1440px  content reaches max width */
+  --z-sticky: 20;
+  --z-drawer: 50;
+  --z-toast: 60;
+
+  /* ---------------------------------------------------------------- 3. COMPONENT */
+  --button-height-sm: 32px;
+  --button-height-md: 36px;
+  --button-height-lg: 44px;
+  --button-radius: var(--radius-md);
+  --input-height: 36px;
+  --input-height-lg: 44px;
+  --input-radius: var(--radius-md);
+  --input-border: var(--color-border-strong);
+  --panel-radius: var(--radius-lg);
+  --panel-padding: var(--space-5);
+  --table-cell-pad-y: var(--space-3);
+  --table-cell-pad-x: var(--space-3);
+  --cell-size-width: 76px;            /* size-matrix cell */
+  --cell-stitch: 1px dashed currentColor;
+  --nav-item-height: 40px;
+  --toast-width: 440px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-instant: 0ms;
+    --motion-duration-fast: 0ms;
+    --motion-duration-base: 0ms;
+    --motion-duration-slow: 0ms;
+    --motion-duration-emphasis: 0ms;
+  }
+}
