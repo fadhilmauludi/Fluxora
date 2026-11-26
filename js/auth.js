@@ -71,17 +71,23 @@
     const go = document.getElementById('login-go');
     const toggle = document.getElementById('pw-toggle');
 
-    document.getElementById('demo-list').innerHTML = ACCOUNTS.map(
-      (a) =>
-        '<button type="button" class="demo-acc" data-email="' + a.email + '"><span class="avatar">' + a.initials + '</span>' +
-        '<span><span class="nm" style="display:block">' + a.name + '</span><span class="em">' + a.email + '</span></span>' +
-        '<span class="scope">' + a.scope + '</span></button>',
-    ).join('');
+    const groups = [
+      ['Founder / Owner', ACCOUNTS.filter((a) => a.role === 'owner'), true],
+      ['PIC tiap bagian', ACCOUNTS.filter((a) => a.role.startsWith('pic_'))],
+      ['Staf', ACCOUNTS.filter((a) => a.role.startsWith('staf'))],
+    ];
+    const card = (a) =>
+      '<button type="button" class="demo-acc" data-email="' + a.email + '" title="' + a.email + '"><span class="avatar">' + a.initials + '</span>' +
+      '<span style="min-width:0"><span class="nm" style="display:block">' + a.name + '</span><span class="em" style="display:block">' + a.email + '</span><span class="scope">' + a.scope + '</span></span></button>';
+    document.getElementById('demo-list').innerHTML = groups
+      .map(([label, list, one]) => '<div class="demo-group"><div class="demo-group-h">' + label + '</div><div class="demo-grid' + (one ? ' one' : '') + '">' + list.map(card).join('') + '</div></div>')
+      .join('');
     document.querySelectorAll('.demo-acc').forEach(
       (b) =>
         (b.onclick = () => {
           email.value = b.dataset.email;
           pass.value = PASSWORD;
+          document.querySelectorAll('.demo-acc').forEach((x) => x.classList.toggle('is-picked', x === b));
           clearError();
           go.focus();
         }),
