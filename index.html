@@ -6,8 +6,8 @@
   <title>Fluxora — Stok & Pesanan Beckycoo</title>
   <meta name="description" content="Fluxora: sinkronisasi stok Shopee & Tokopedia, pencatatan pesanan, buku kas otomatis, dan forecast produksi untuk Beckycoo.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%2318213a'/%3E%3Cg fill='none' stroke-linecap='round' stroke-width='4.4'%3E%3Cpath d='M16 52 V27 C16 17.5 22.5 11 32 11 H48' stroke='%23fff'/%3E%3Cpath d='M22 52 V28 C22 21.5 26 17 32.5 17 H48' stroke='%23fff'/%3E%3Cpath d='M28 52 V37 C28 32 31 29 36 29 H42' stroke='%23f2c14e'/%3E%3C/g%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/tokens.css?v=s2b">
-  <link rel="stylesheet" href="css/app.css?v=s2b">
+  <link rel="stylesheet" href="css/tokens.css?v=s2c">
+  <link rel="stylesheet" href="css/app.css?v=s2c">
 </head>
 <body class="is-auth">
 
@@ -19,48 +19,47 @@
         <div><div class="brand-word">fluxora</div><div class="brand-for">untuk Beckycoo</div></div>
       </div>
 
-      <!-- One orchestrated moment: a sale on Shopee ticks the master tag and the Tokopedia tag together. -->
-      <div class="tag-scene" id="tag-scene" role="img" aria-label="Ilustrasi: satu label stok terhubung ke Shopee dan Tokopedia; saat terjual di Shopee, ketiganya berubah dari 14 menjadi 13.">
-        <svg viewBox="0 0 520 300" preserveAspectRatio="xMinYMid meet" aria-hidden="true">
-          <defs>
-            <pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="4" fill="rgb(255 255 255 / .18)"/></pattern>
-          </defs>
-          <!-- threads -->
-          <path class="thread" d="M200 128 C 260 128, 270 62, 340 62" fill="none" style="stroke:var(--color-accent)" stroke-width="1.6"/>
-          <path class="thread" d="M200 172 C 260 172, 270 238, 340 238" fill="none" style="stroke:var(--color-accent)" stroke-width="1.6"/>
-          <!-- master hang tag -->
-          <g transform="translate(20 40)">
-            <path d="M28 0 H180 V220 H0 V28 Z" style="fill:var(--color-surface-raised)"/>
-            <circle cx="30" cy="30" r="7" style="fill:var(--color-surface-inverse)"/><circle cx="30" cy="30" r="3" style="fill:var(--color-accent)"/>
-            <text x="20" y="72" font-size="12" font-weight="600" style="fill:var(--color-text-secondary)">Kaos Oversize Sunday</text>
-            <text x="20" y="90" font-size="12" style="fill:var(--color-text-tertiary)">Hitam, ukuran M</text>
-            <text x="20" y="128" font-size="12" style="fill:var(--color-text-tertiary)">Stok gudang</text>
-            <g class="n" font-size="56" font-weight="800" style="fill:var(--color-text-primary)">
-              <text x="18" y="186" id="ms-a">14</text>
-              <text x="18" y="186" id="ms-b" opacity="0">13</text>
-            </g>
-            <rect x="20" y="200" width="140" height="1" style="fill:var(--color-border-subtle)"/>
-          </g>
-          <!-- channel tags -->
-          <g transform="translate(340 22)">
-            <rect width="160" height="80" rx="10" style="fill:var(--color-surface-inverse-raised)"/>
-            <circle cx="20" cy="22" r="5" style="fill:var(--color-channel-shopee)"/>
-            <text x="32" y="26" font-size="12" font-weight="600" style="fill:var(--color-surface-raised)">Shopee</text>
-            <g class="n" font-size="30" font-weight="700" style="fill:var(--color-surface-raised)"><text x="18" y="64" id="sp-a">14</text><text x="18" y="64" id="sp-b" opacity="0">13</text></g>
-            <text x="148" y="64" font-size="11" style="fill:var(--color-text-on-inverse-muted)" text-anchor="end" id="sp-note">listing</text>
-          </g>
-          <g transform="translate(340 198)">
-            <rect width="160" height="80" rx="10" style="fill:var(--color-surface-inverse-raised)"/>
-            <rect x="15" y="17" width="9" height="9" style="fill:var(--color-channel-tokopedia)" transform="rotate(45 19.5 21.5)"/>
-            <text x="32" y="26" font-size="12" font-weight="600" style="fill:var(--color-surface-raised)">Tokopedia</text>
-            <g class="n" font-size="30" font-weight="700" style="fill:var(--color-surface-raised)"><text x="18" y="64" id="tk-a">14</text><text x="18" y="64" id="tk-b" opacity="0">13</text></g>
-            <text x="148" y="64" font-size="11" style="fill:var(--color-text-on-inverse-muted)" text-anchor="end">listing</text>
-          </g>
+      <!-- One orchestrated loop: an order lands on one marketplace, travels the thread to the
+           warehouse tag, and the same number reaches the other marketplace. -->
+      <figure class="sync-scene" id="sync-scene" aria-label="Ilustrasi: satu label stok gudang terhubung ke listing Shopee dan Tokopedia. Setiap pesanan mengurangi angka yang sama di ketiganya.">
+        <div class="sync-stage">
+        <svg class="sync-threads" viewBox="0 0 600 344" aria-hidden="true">
+          <path id="th-shp" d="" />
+          <path id="th-tkp" d="" />
+          <path class="hang" id="th-hang" d="" />
+          <circle class="pulse" id="sync-pulse" r="6" cx="-20" cy="-20" />
+          <circle class="pulse" id="sync-pulse2" r="6" cx="-20" cy="-20" />
         </svg>
-      </div>
+
+        <div class="hangtag" aria-hidden="true">
+          <span class="hangtag-hole"></span>
+          <div class="hangtag-name">Kaos Oversize Sunday</div>
+          <div class="hangtag-var">Hitam</div>
+          <div class="hangtag-lbl">Stok gudang per ukuran</div>
+          <div class="hangtag-sizes">
+            <span><i>S</i><b>9</b></span>
+            <span class="is-live"><i>M</i><b data-n="tag">14</b></span>
+            <span><i>L</i><b>11</b></span>
+            <span><i>XL</i><b>6</b></span>
+          </div>
+        </div>
+
+        <div class="listing shp" aria-hidden="true">
+          <div class="listing-h"><span class="mk"></span>Shopee<em class="listing-ev" data-ev="shopee"></em></div>
+          <div class="listing-p">Kaos Oversize Sunday, M</div>
+          <div class="listing-n"><b data-n="shopee">14</b><span>tersedia</span></div>
+        </div>
+        <div class="listing tkp" aria-hidden="true">
+          <div class="listing-h"><span class="mk"></span>Tokopedia<em class="listing-ev" data-ev="tokopedia"></em></div>
+          <div class="listing-p">Kaos Oversize Sunday, M</div>
+          <div class="listing-n"><b data-n="tokopedia">14</b><span>tersedia</span></div>
+        </div>
+        </div>
+
+        <figcaption class="sync-cap" id="sync-cap">Satu angka stok dipakai bersama oleh gudang, Shopee, dan Tokopedia.</figcaption>
+      </figure>
 
       <div class="auth-copy">
-        <span class="auth-eyebrow">Sinkronisasi stok &amp; pencatatan pesanan</span>
         <h2>Satu angka stok untuk Shopee dan Tokopedia.</h2>
         <p>Pesanan, stok per ukuran, buku kas, dan rencana produksi ke maklon cukup dicatat satu kali, lalu otomatis saling terhubung.</p>
         <ul class="auth-points">
@@ -69,7 +68,7 @@
           <li><span class="pt-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18l6-6 4 3 6-8"/><path d="M15 7h5v5"/></svg></span><span><b>Forecast produksi</b>Rekomendasi jumlah pesanan ke maklon</span></li>
         </ul>
       </div>
-      <div class="auth-art-foot"><span>Prototipe simulasi · Kelompok 5</span><a href="about.html">Tentang tim</a></div>
+      <div class="auth-art-foot"><span>Prototipe simulasi oleh Kelompok 5</span><a href="about.html">Tentang tim</a></div>
     </section>
 
     <section class="auth-form-wrap">
@@ -142,26 +141,26 @@
     </div>
   </div>
 
-  <script src="js/util.js?v=s2b"></script>
-  <script src="data/demo-data.js?v=s2b"></script>
-  <script src="js/seed.js?v=s2b"></script>
-  <script src="js/store.js?v=s2b"></script>
-  <script src="js/forecast.js?v=s2b"></script>
-  <script src="js/ui.js?v=s2b"></script>
-  <script src="js/reports.js?v=s2b"></script>
-  <script src="js/views/ringkasan.js?v=s2b"></script>
-  <script src="js/views/stok.js?v=s2b"></script>
-  <script src="js/views/pesanan.js?v=s2b"></script>
-  <script src="js/views/masuk.js?v=s2b"></script>
-  <script src="js/views/keuangan.js?v=s2b"></script>
-  <script src="js/views/forecast.js?v=s2b"></script>
-  <script src="js/views/lainnya.js?v=s2b"></script>
-  <script src="js/modules.js?v=s2b"></script>
-  <script src="js/views/panduan.js?v=s2b"></script>
-  <script src="js/intro.js?v=s2b"></script>
-  <script src="js/auth.js?v=s2b"></script>
-  <script src="js/tour.js?v=s2b"></script>
-  <script src="js/arrivals.js?v=s2b"></script>
-  <script src="js/app.js?v=s2b"></script>
+  <script src="js/util.js?v=s2c"></script>
+  <script src="data/demo-data.js?v=s2c"></script>
+  <script src="js/seed.js?v=s2c"></script>
+  <script src="js/store.js?v=s2c"></script>
+  <script src="js/forecast.js?v=s2c"></script>
+  <script src="js/ui.js?v=s2c"></script>
+  <script src="js/reports.js?v=s2c"></script>
+  <script src="js/views/ringkasan.js?v=s2c"></script>
+  <script src="js/views/stok.js?v=s2c"></script>
+  <script src="js/views/pesanan.js?v=s2c"></script>
+  <script src="js/views/masuk.js?v=s2c"></script>
+  <script src="js/views/keuangan.js?v=s2c"></script>
+  <script src="js/views/forecast.js?v=s2c"></script>
+  <script src="js/views/lainnya.js?v=s2c"></script>
+  <script src="js/modules.js?v=s2c"></script>
+  <script src="js/views/panduan.js?v=s2c"></script>
+  <script src="js/intro.js?v=s2c"></script>
+  <script src="js/auth.js?v=s2c"></script>
+  <script src="js/tour.js?v=s2c"></script>
+  <script src="js/arrivals.js?v=s2c"></script>
+  <script src="js/app.js?v=s2c"></script>
 </body>
 </html>

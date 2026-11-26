@@ -147,22 +147,149 @@
     playScene();
   };
 
-  // The single orchestrated motion on the page: one sale, three tags change.
-  let played = false;
-  function playScene() {
-    if (played) return;
-    played = true;
-    const swap = (a, b) => {
-      document.getElementById(a).classList.add('tick-out');
-      const el = document.getElementById(b);
-      el.setAttribute('opacity', '1');
-      el.classList.add('tick-in');
+  // The one orchestrated loop on the page. An order lands on one marketplace, a
+  // pulse travels the thread to the warehouse tag (size M drops), then on to the
+  // other marketplace, which shows the same number. When stock runs low, goods
+  // arrive from the maklon and the number goes back up on all three.
+  let sceneOn = false;
+  // Threads are drawn from the real positions of the tag and the two listings,
+  // so they always meet the cards whatever the panel size.
+  function layoutThreads(root) {
+    // The stage is drawn at 600×330 and scaled to the panel, so text never overflows.
+    const stage = root.querySelector('.sync-stage');
+    const w = root.getBoundingClientRect().width;
+    if (!w) return;
+    const k = w / 600;
+    stage.style.setProperty('--k', k);
+    const svg = root.querySelector('.sync-threads');
+    svg.setAttribute('viewBox', '0 0 600 330');
+    const R = stage.getBoundingClientRect();
+    const rel = (el) => {
+      const r = el.getBoundingClientRect();
+      return { l: (r.left - R.left) / k, r: (r.right - R.left) / k, t: (r.top - R.top) / k, b: (r.bottom - R.top) / k, h: r.height / k, w: r.width / k };
     };
-    setTimeout(() => {
-      swap('sp-a', 'sp-b');
-      document.getElementById('sp-note').textContent = 'terjual 1';
-      setTimeout(() => swap('ms-a', 'ms-b'), 260);
-      setTimeout(() => swap('tk-a', 'tk-b'), 520);
-    }, 1300);
+    const tag = rel(root.querySelector('.hangtag'));
+    const hole = rel(root.querySelector('.hangtag-hole'));
+    const curve = (x1, y1, x2, y2) => { const m = (x1 + x2) / 2; return 'M' + x1 + ' ' + y1 + ' C ' + m + ' ' + y1 + ', ' + m + ' ' + y2 + ', ' + x2 + ' ' + y2; };
+    [['th-shp', '.listing.shp', 0.3], ['th-tkp', '.listing.tkp', 0.72]].forEach(([id, sel, f]) => {
+      const c = rel(root.querySelector(sel));
+      document.getElementById(id).setAttribute('d', curve(tag.r, tag.t + tag.h * f, c.l, c.t + c.h / 2));
+    });
+    const hx = hole.l + hole.w / 2, hy = hole.t + hole.h / 2;
+    document.getElementById('th-hang').setAttribute('d', 'M' + hx + ' ' + hy + ' C ' + hx + ' ' + (hy - 30) + ', ' + (hx - 60) + ' ' + (hy - 20) + ', ' + (hx - 70) + ' ' + (-8));
+  }
+  function playScene() {
+    if (sceneOn) return;
+    const root = document.getElementById('sync-scene');
+    if (!root) return;
+    sceneOn = true;
+    layoutThreads(root);
+    window.addEventListener('resize', () => layoutThreads(root));
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return; // static, readable state
+    const pulse = document.getElementById('sync-pulse');
+    const pulse2 = document.getElementById('sync-pulse2');
+    const cap = document.getElementById('sync-cap');
+    const path = { shopee: document.getElementById('th-shp'), tokopedia: document.getElementById('th-tkp') };
+    const card = { shopee: root.querySelector('.listing.shp'), tokopedia: root.querySelector('.listing.tkp') };
+    const ev = { shopee: root.querySelector('[data-ev="shopee"]'), tokopedia: root.querySelector('[data-ev="tokopedia"]') };
+    const num = (k) => root.querySelector('[data-n="' + k + '"]');
+    const cell = root.querySelector('.hangtag-sizes .is-live');
+    let stock = 14;
+    let turn = 'shopee';
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const running = () => document.body.classList.contains('is-auth') && !document.hidden;
+
+    function setNum(k, v) {
+      const el = num(k);
+      el.textContent = v;
+      el.classList.remove('tick');
+      void el.offsetWidth;
+      el.classList.add('tick');
+    }
+    function say(text) {
+      cap.classList.add('swap');
+      setTimeout(() => ((cap.textContent = text), cap.classList.remove('swap')), 200);
+    }
+    function travel(p, reverse, ms, dot) {
+      dot = dot || pulse;
+      return new Promise((done) => {
+        const len = p.getTotalLength();
+        p.classList.add('is-hot');
+        const t0 = performance.now();
+        (function step(t) {
+          const k = Math.min(1, (t - t0) / ms);
+          const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+          const pt = p.getPointAtLength((reverse ? 1 - e : e) * len);
+          dot.setAttribute('cx', pt.x);
+          dot.setAttribute('cy', pt.y);
+          dot.style.opacity = 1;
+          if (k < 1) requestAnimationFrame(step);
+          else {
+            p.classList.remove('is-hot');
+            dot.style.opacity = 0;
+            done();
+          }
+        })(t0);
+      });
+    }
+    function hit() {
+      cell.classList.remove('flash');
+      void cell.offsetWidth;
+      cell.classList.add('flash');
+    }
+
+    async function sale(from) {
+      const to = from === 'shopee' ? 'tokopedia' : 'shopee';
+      const name = { shopee: 'Shopee', tokopedia: 'Tokopedia' };
+      card[from].classList.add('is-hot');
+      ev[from].textContent = 'Pesanan baru';
+      ev[from].classList.add('on');
+      stock -= 1;
+      setNum(from, stock);
+      say('Pesanan masuk dari ' + name[from] + ' untuk ukuran M.');
+      await wait(700);
+      await travel(path[from], true, 750);
+      hit();
+      setNum('tag', stock);
+      say('Stok gudang langsung berkurang menjadi ' + stock + '.');
+      card[from].classList.remove('is-hot');
+      ev[from].classList.remove('on');
+      await wait(650);
+      await travel(path[to], false, 750);
+      card[to].classList.add('is-hot');
+      setNum(to, stock);
+      say(name[to] + ' ikut menampilkan ' + stock + '. Tidak ada yang dicatat ulang.');
+      await wait(900);
+      card[to].classList.remove('is-hot');
+    }
+    async function restock() {
+      const add = 14 - stock;
+      stock = 14;
+      hit();
+      setNum('tag', stock);
+      say('Barang dari maklon diterima: +' + add + ' pcs ukuran M.');
+      await wait(700);
+      await Promise.all([travel(path.shopee, false, 750), travel(path.tokopedia, false, 750, pulse2)]);
+      setNum('shopee', stock);
+      setNum('tokopedia', stock);
+      say('Kedua marketplace kembali menampilkan ' + stock + '.');
+    }
+
+    (async function loop() {
+      await wait(1400);
+      for (;;) {
+        if (!running()) {
+          await wait(800);
+          continue;
+        }
+        if (stock <= 11) await restock();
+        else {
+          await sale(turn);
+          turn = turn === 'shopee' ? 'tokopedia' : 'shopee';
+        }
+        await wait(2600);
+      }
+    })();
   }
 })();
