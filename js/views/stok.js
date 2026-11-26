@@ -26,7 +26,6 @@
       const zero = [];
       const low = [];
       st.products.forEach((p) => FX.SIZES.forEach((s) => (p.stock[s] === 0 ? zero : p.stock[s] <= st.settings.lowStock ? low : []).push(1)));
-      const reports = st.reports.filter((r) => r.status === 'open');
 
       const body = rows
         .map((p) => {
@@ -49,13 +48,13 @@
         .join('');
 
       return (
-        (!canAdjust && !canReceive ? ui.readonly('Anda bisa melihat dan mencocokkan stok fisik. Jika ada selisih, kirim laporan ke PIC Gudang.') : '') +
+        (!canAdjust && !canReceive ? ui.readonly('Anda dapat melihat stok dan mencocokkannya dengan kondisi fisik. Jika ada selisih, kirim laporan kepada PIC terkait.') : '') +
         '<div class="toolbar">' +
         '<input class="search" id="stok-q" placeholder="Cari model, warna, SKU…" value="' + esc(q) + '">' +
         '<div class="seg">' + ['semua', 'menipis', 'habis'].map((f) => '<button data-f="' + f + '" class="' + (filter === f ? 'on' : '') + '">' + f[0].toUpperCase() + f.slice(1) + '</button>').join('') + '</div>' +
         '<span class="note">' + zero.length + ' ukuran habis, ' + low.length + ' menipis (≤ ' + st.settings.lowStock + ')</span>' +
         '<span style="flex:1"></span>' +
-        (S.can('report.add') ? '<button class="btn" data-act="report">Laporkan selisih ke PIC</button>' : '') +
+        FX.reports.button('stok') +
         (canReceive ? '<a class="btn primary" href="#masuk" data-go="masuk">' + ui.icon('box', 15) + 'Catat barang masuk</a>' : '') +
         '</div>' +
 
@@ -65,15 +64,12 @@
 
         '<div class="grid g-2">' +
         '<section class="panel"><div class="panel-h"><h2>Cara membaca</h2></div><div class="panel-b" style="display:grid;gap:10px;font-size:13px">' +
-        '<div style="display:flex;gap:12px;align-items:center"><table class="matrix"><tr><td class="cell zero" style="width:46px"><span class="q" style="padding:8px 0">0</span></td></tr></table> Listing di Shopee dan Tokopedia otomatis 0, jadi pembeli tidak bisa checkout ukuran ini.</div>' +
-        '<div style="display:flex;gap:12px;align-items:center"><table class="matrix"><tr><td class="cell lo" style="width:46px"><span class="q" style="padding:8px 0">2</span></td></tr></table> Menipis: sama dengan atau di bawah batas di Pengaturan.</div>' +
+        '<div style="display:flex;gap:12px;align-items:center"><table class="matrix"><tr><td class="cell zero" style="width:46px"><span class="q" style="padding:8px 0">0</span></td></tr></table> Listing di Shopee dan Tokopedia otomatis 0, sehingga pembeli tidak dapat membeli ukuran ini.</div>' +
+        '<div style="display:flex;gap:12px;align-items:center"><table class="matrix"><tr><td class="cell lo" style="width:46px"><span class="q" style="padding:8px 0">2</span></td></tr></table> Menipis: sama dengan atau di bawah batas yang diatur di Pengaturan.</div>' +
         '<div style="display:flex;gap:12px;align-items:center"><table class="matrix"><tr><td class="cell" style="width:46px"><span class="q" style="padding:8px 0 12px">6</span><span class="inc">+14</span></td></tr></table> Angka kecil di bawah sel adalah jumlah yang sedang diproduksi maklon (PO terbuka).</div>' +
         '</div></section>' +
-        '<section class="panel"><div class="panel-h"><h2>Laporan staf</h2><span class="meta">' + reports.length + ' terbuka</span></div><div class="list">' +
-        (reports.length
-          ? reports.map((r) => '<div class="li">' + ui.lvl('warning', 'Cek') + '<div><div class="ttl">' + esc(r.who) + ' <span class="muted" style="font-weight:400">' + FX.ago(r.at) + '</span></div><div class="body">' + esc(r.text) + '</div></div>' + (S.can('report.resolve') ? '<button class="btn sm" data-resolve="' + r.id + '">Selesai</button>' : '') + '</div>').join('')
-          : '<div class="empty">Tidak ada laporan terbuka.</div>') +
-        '</div></section></div>'
+        FX.reports.panel('stok') +
+        '</div>'
       );
     },
     mount(el, ref) {
@@ -84,45 +80,13 @@
       };
       el.querySelectorAll('[data-f]').forEach((b) => (b.onclick = () => ((filter = b.dataset.f), FX.app.render())));
       el.querySelectorAll('[data-pid]').forEach((tr) => (tr.onclick = () => openProduct(tr.dataset.pid)));
-      el.querySelectorAll('[data-resolve]').forEach((b) => (b.onclick = () => S.resolveReport(b.dataset.resolve)));
-      const rep = el.querySelector('[data-act="report"]');
-      if (rep) rep.onclick = openReport;
+      FX.reports.mount(el);
       if (ref && S.product(ref)) {
         FX.app.ref = null;
         openProduct(ref);
       }
     },
   };
-
-  function openReport() {
-    const d = ui.drawer({
-      title: 'Laporkan selisih stok',
-      sub: 'Masuk ke daftar perhatian PIC Gudang dan Owner',
-      body:
-        '<div class="form-grid"><label class="field"><span>Model</span><select id="rp-p">' + S.state.products.map((p) => '<option value="' + p.id + '">' + esc(p.name + ' — ' + p.color) + '</option>').join('') + '</select></label>' +
-        '<label class="field"><span>Ukuran</span><select id="rp-s">' + FX.SIZES.map((s) => '<option>' + s + '</option>').join('') + '</select></label>' +
-        '<label class="field"><span>Hitungan fisik</span><input id="rp-n" type="number" min="0" inputmode="numeric"></label>' +
-        '<label class="field"><span>Di sistem</span><input id="rp-sys" disabled></label>' +
-        '<label class="field full"><span>Catatan</span><textarea id="rp-t" rows="3" placeholder="mis. 1 pcs cacat jahitan, dipisahkan"></textarea></label></div>',
-      foot: '<button class="btn" data-close>Batal</button><button class="btn primary" id="rp-go">Kirim laporan</button>',
-      onMount(d) {
-        const sync = () => (d.querySelector('#rp-sys').value = S.product(d.querySelector('#rp-p').value).stock[d.querySelector('#rp-s').value]);
-        d.querySelector('#rp-p').onchange = sync;
-        d.querySelector('#rp-s').onchange = sync;
-        sync();
-        d.querySelector('#rp-go').onclick = () => {
-          const p = S.product(d.querySelector('#rp-p').value);
-          const s = d.querySelector('#rp-s').value;
-          const n = d.querySelector('#rp-n').value;
-          const t = d.querySelector('#rp-t').value.trim();
-          if (n === '' && !t) return ui.toast('Isi hitungan fisik atau catatan.', 'bad');
-          S.addReport(p.name + ' ' + p.color + ' ' + s + ': ' + (n !== '' ? 'fisik ' + n + ', sistem ' + p.stock[s] + '. ' : '') + t);
-          ui.closeDrawer();
-          ui.toast('Laporan terkirim ke PIC Gudang.', '', 'Laporan');
-        };
-      },
-    });
-  }
 
   function openProduct(pid) {
     const p = S.product(pid);
@@ -145,7 +109,7 @@
       '<div><div class="lbl" style="margin-bottom:8px">Mutasi terakhir</div>' +
       (moves.length
         ? '<div class="panel"><table class="t"><tbody>' + moves.map((m) => '<tr><td class="mono muted nowrap">' + FX.fmtDateTime(m.at) + '</td><td>' + R[m.reason] + '</td><td class="mono">' + m.size + '</td><td class="r num" style="color:' + (m.delta > 0 ? 'var(--color-status-success)' : 'var(--color-text-primary)') + '">' + (m.delta > 0 ? '+' : '') + m.delta + '</td><td class="muted">' + esc(m.by) + '</td></tr>').join('') + '</tbody></table></div>'
-        : '<div class="muted" style="font-size:13px">Belum ada mutasi sejak impor dari spreadsheet. Stok awal: ' + FX.SIZES.map((s) => s + ' ' + st.opening[pid][s]).join(', ') + '.</div>') +
+        : '<div class="muted" style="font-size:13px">Belum ada mutasi sejak data dimuat. Stok awal: ' + FX.SIZES.map((s) => s + ' ' + st.opening[pid][s]).join(', ') + '.</div>') +
       '</div>';
     ui.drawer({
       title: esc(p.name),
@@ -166,7 +130,7 @@
             }
           });
           ui.closeDrawer();
-          ui.toast(changed ? changed + ' ukuran dikoreksi. Shopee & Tokopedia sudah mengikuti angka baru.' : 'Tidak ada perubahan.', '', 'Opname');
+          ui.toast(changed ? changed + ' ukuran telah dikoreksi. Shopee dan Tokopedia sudah mengikuti angka terbaru.' : 'Tidak ada perubahan yang disimpan.', '', 'Opname');
         };
       },
     });

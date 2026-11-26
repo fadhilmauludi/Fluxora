@@ -20,7 +20,7 @@
       const owner = S.role === 'owner';
 
       return (
-        (owner ? '' : ui.readonly('Rekomendasi bisa dilihat untuk persiapan gudang. Keputusan PO ada di Owner.')) +
+        (owner ? '' : ui.readonly('Rekomendasi ini dapat dipakai untuk persiapan gudang. Keputusan PO ada pada Owner.')) +
         '<div class="callout">Perkiraan dibuat dari <b>12 minggu penjualan</b> per model. Lonjakan tanggal kembar dipisahkan dulu supaya minggu biasa tidak ikut membengkak, lalu ditambahkan kembali bila <b>' + f.nextTwinLabel + '</b> jatuh dalam jendela produksi. Waktu tunggu maklon <b>' + set.leadTimeDays + ' hari</b>, ditinjau tiap <b>' + set.reviewDays + ' hari</b>, MOQ <b>' + set.moq + ' pcs</b>.</div>' +
 
         '<section class="panel scroll-x"><div class="panel-h"><h2>Semua model</h2><span class="meta">' + due.length + ' perlu dipesan. Pilih baris untuk melihat hitungannya.</span></div>' +
@@ -53,7 +53,7 @@
 
         '<section class="panel"><div class="panel-h"><h2>Hitungan</h2></div><div class="panel-b">' +
         '<div class="lbl">Rekomendasi pesan</div><div class="big" style="margin:8px 0 4px">' + f.recommend + ' pcs</div>' +
-        '<div class="muted" style="font-size:13px;margin-bottom:16px">' + (f.recommend ? 'Modal ' + FX.rp(f.capital) + ', tiba sekitar ' + FX.fmtDate(Date.now() + set.leadTimeDays * FX.DAY) : 'stok + PO terbuka masih di atas titik pesan (' + f.position + ' vs ' + f.reorderPoint + '). Tinjau lagi di siklus berikutnya.') + '</div>' +
+        '<div class="muted" style="font-size:13px;margin-bottom:16px">' + (f.recommend ? 'Modal ' + FX.rp(f.capital) + ', tiba sekitar ' + FX.fmtDate(Date.now() + set.leadTimeDays * FX.DAY) : 'Stok dan PO terbuka masih di atas titik pesan (' + f.position + ' vs ' + f.reorderPoint + '). Tinjau kembali pada siklus berikutnya.') + '</div>' +
         '<table class="t" style="font-size:13px"><tbody>' +
         row('Laju penjualan (Holt)', f.perWeek.toFixed(1) + ' / mgg') +
         row('Kebutuhan ' + (set.leadTimeDays + set.reviewDays) + ' hari', Math.round(f.demandCover - f.twinExtra) + ' pcs') +

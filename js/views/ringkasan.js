@@ -77,7 +77,7 @@
         '<div class="kpi"><div class="lbl">Omzet 30 hari</div><div class="v">' + FX.rpShort(rev30) + '</div><div class="d"><b>' + (delta >= 0 ? '+' : '−') + Math.abs(delta * 100).toFixed(0) + '%</b> vs 30 hari sebelumnya</div></div>' +
         '<div class="kpi"><div class="lbl">Nilai stok (HPP)</div><div class="v">' + FX.rpShort(stockVal) + '</div><div class="d">' + FX.num(units) + ' pcs, ' + empty.length + ' ukuran kosong</div></div>' +
         '<div class="kpi ' + (late.length ? 'alert' : '') + '"><div class="lbl">Perlu dikirim</div><div class="v">' + open.length + ' pesanan</div><div class="d">' + (late.length ? '<b style="color:var(--color-status-critical);font-weight:var(--font-weight-semibold)">' + late.length + ' lewat batas</b> · ' : '') + soon.length + ' kurang dari 3 jam</div></div>' +
-        '<div class="kpi"><div class="lbl">Overselling dicegah</div><div class="v">' + st.blocked + '×</div><div class="d">checkout ditahan sebelum jadi pembatalan</div></div>' +
+        '<div class="kpi"><div class="lbl">Overselling dicegah</div><div class="v">' + st.blocked + '×</div><div class="d">checkout ditolak sebelum menjadi pembatalan</div></div>' +
         '</section>' +
 
         '<div class="grid g-3-1">' +
@@ -87,7 +87,7 @@
 
         '<section class="panel"><div class="panel-h"><h2>Kesehatan data</h2><span class="spacer"></span>' + (rec.ok ? ui.lvl('good', 'cocok') : ui.lvl('critical', 'selisih')) + '</div>' +
         '<div class="panel-b"><div class="big">' + (rec.stockIssues.length + rec.orderIssues.length + rec.poIssues.length) + ' selisih</div>' +
-        '<p class="ink2" style="margin:8px 0 14px">Stok, pesanan, dan kas dicocokkan otomatis setiap ada kejadian. Tidak perlu pencocokan manual di akhir periode.</p>' +
+        '<p class="ink2" style="margin:8px 0 14px">Stok, pesanan, dan kas dicocokkan otomatis setiap ada transaksi, sehingga tidak perlu pencocokan manual di akhir periode.</p>' +
         '<dl class="dl"><dt>Sel stok dicek</dt><dd class="num">' + rec.cells + '</dd><dt>Mutasi stok</dt><dd class="num">' + rec.movements + '</dd><dt>Pesanan terkirim ↔ kas</dt><dd class="num">' + rec.shipped + '</dd><dt>Barang masuk ↔ kas</dt><dd class="num">' + rec.received + '</dd></dl>' +
         '<div style="margin-top:16px"><a class="btn sm" href="#keuangan" data-go="keuangan">Lihat rekonsiliasi</a></div></div></section>' +
         '</div>' +
@@ -95,7 +95,7 @@
         '<div class="grid g-2">' +
         '<section class="panel"><div class="panel-h"><h2>Keputusan produksi</h2><span class="meta">dari forecast</span><span class="spacer"></span><a class="btn sm ghost" href="#forecast" data-go="forecast">Buka forecast</a></div>' +
         (due.length
-          ? '<div class="panel-b" style="padding-bottom:6px"><div class="callout"><b>' + due.length + ' model</b> sudah di bawah titik pesan. Total rekomendasi <b>' + FX.sum(due, (f) => f.recommend) + ' pcs</b>, butuh modal <b>' + FX.rp(capital) + '</b> — kas saat ini ' + FX.rp(cash) + '.</div></div>'
+          ? '<div class="panel-b" style="padding-bottom:6px"><div class="callout"><b>' + due.length + ' model</b> telah mencapai titik pesan. Total rekomendasi <b>' + FX.sum(due, (f) => f.recommend) + ' pcs</b>, butuh modal <b>' + FX.rp(capital) + '</b> — kas saat ini ' + FX.rp(cash) + '.</div></div>'
           : '') +
         '<table class="t"><thead><tr><th>Model</th><th class="r">Laku / mgg</th><th class="r">Cukup untuk</th><th>Status</th></tr></thead><tbody>' +
         top
@@ -112,7 +112,7 @@
         (S.notifications()
           .slice(0, 7)
           .map((n) => '<div class="li click" data-go="' + n.go + '" data-ref="' + esc(n.ref) + '">' + ui.lvl(n.level, ui.kindLabel(n.kind)) + '<div><div class="ttl">' + esc(n.title) + '</div><div class="body">' + esc(n.body) + '</div></div><span class="chev">' + ui.icon('chev', 16) + '</span></div>')
-          .join('') || '<div class="empty">Semua beres.</div>') +
+          .join('') || '<div class="empty">Tidak ada hal yang perlu ditindaklanjuti.</div>') +
         '</div></section>' +
         '</div>'
       );

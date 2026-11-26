@@ -13,13 +13,23 @@ yang masih berdasarkan perkiraan.
 
 ## Menjalankan
 Buka `index.html` langsung di browser (tanpa build, tanpa server). Halaman pertama adalah login:
-pilih salah satu akun demo (kata sandi `beckycoo`). Data tersimpan di localStorage browser;
-reset lewat **Pengaturan → Reset data demo** (akun Owner).
+pilih salah satu dari tujuh akun simulasi (kata sandi `beckycoo`).
+
+## Data simulasi terpusat
+Semua data demo berada di **satu berkas**: `data/demo-data.js`. Seluruh halaman (Ringkasan, Stok,
+Pesanan, Barang masuk, Keuangan, Forecast, Aktivitas) membaca kondisi awalnya dari berkas ini.
+Angka acak dalam simulasi memakai pengacak berbenih yang disimpan di data, sehingga setiap browser
+memulai dengan angka yang sama dan urutan tindakan yang sama menghasilkan hasil yang sama.
+Perubahan selama demo disimpan di browser; kembalikan ke kondisi awal lewat
+**Pengaturan → Atur ulang data demo** (akun Owner). Untuk mengubah data demo, sunting berkas
+tersebut lalu naikkan nilai `version`.
+
+Aplikasi selalu menampilkan pemberitahuan **Mode simulasi** agar data contoh tidak dikira data toko yang sebenarnya.
 
 ## Logo, intro, dan panduan
 - Logo: tiga garis fluks membentuk huruf F (berkas di `assets/logo/`). Intro animasi fluks 3D diputar sekali per sesi browser (bisa dilewati, dimatikan otomatis bila pengguna memilih kurangi gerak).
 - **Pesanan contoh saat masuk**: setiap kali login, pesanan Shopee/Tokopedia yang "masuk" sejak login terakhir diputar ulang (mulai 3, bertambah 1–2 tiap login, maks. 12). Bisa dimatikan di Pengaturan.
-- Menu **Panduan** (semua peran): tur interaktif per peran, alur kerja harian, langkah per tugas, istilah, dan tanya-jawab. Tur ditawarkan otomatis saat akun pertama kali masuk.
+- Menu **Panduan** (semua peran): 7 modul belajar (materi, praktik langsung di layar, dan cek pemahaman, dengan kemajuan per akun), panduan interaktif per peran, alur kerja harian, langkah per tugas, istilah, dan tanya jawab. Panduan interaktif ditawarkan otomatis saat akun pertama kali masuk.
 
 ## Sistem desain
 - `css/tokens.css`: token 3 tingkat (referensi → semantik → komponen), sumber kebenaran.
@@ -31,7 +41,7 @@ reset lewat **Pengaturan → Reset data demo** (akun Owner).
 | Kejadian | Stok | Listing Shopee + Tokopedia | Buku kas | Forecast / notifikasi |
 |---|---|---|---|---|
 | Pesanan masuk (webhook / tombol simulasi) | berkurang | kedua kanal diperbarui | — | laju penjualan & batas serah kurir |
-| Stok 0 lalu ada checkout | — | checkout ditahan (overselling dicegah) | — | dihitung di Ringkasan |
+| Stok 0 lalu ada checkout | — | checkout ditolak (overselling dicegah) | — | dihitung di Ringkasan |
 | Serahkan ke kurir | — | resi dikirim ke kanal asal | penjualan + biaya platform | — |
 | Batal | dikembalikan | kedua kanal diperbarui | — | — |
 | PO ke maklon (Owner) | angka "+n dalam perjalanan" | — | — | dihitung sebagai stok dalam perjalanan |
@@ -40,14 +50,18 @@ reset lewat **Pengaturan → Reset data demo** (akun Owner).
 
 **Keuangan → Rekonsiliasi otomatis** membuktikan ketiganya selalu cocok.
 
-## Peran (akun demo di halaman login)
+## Peran (akun simulasi di halaman login)
 | Email | Peran |
 |---|---|
 | owner@beckycoo.id | Owner: semua akses, keputusan PO |
 | gudang@beckycoo.id | PIC Gudang: barang masuk, opname, kemas & kirim |
 | admin@beckycoo.id | PIC Admin Toko: pesanan, batal, listing |
 | keuangan@beckycoo.id | PIC Keuangan: buku kas, rekonsiliasi |
-| staf@beckycoo.id | Staf Gudang: lihat, cek fisik, lapor selisih |
+| stafgudang@beckycoo.id | Staf Gudang: lihat stok dan pesanan, cek fisik, lapor selisih stok ke PIC Gudang |
+| stafadmin@beckycoo.id | Staf Admin Toko: lihat pesanan dan stok, lapor kendala pesanan/listing ke PIC Admin Toko |
+| stafkeuangan@beckycoo.id | Staf Keuangan: lihat buku kas dan stok, lapor selisih kas ke PIC Keuangan |
+
+Laporan staf masuk ke daftar *Perlu perhatian* milik PIC terkait dan Owner, lalu ditandai selesai setelah ditangani.
 
 Keluar lewat ikon di kartu pengguna (kiri bawah).
 
@@ -59,7 +73,7 @@ berwarna sementara. Untuk memakai foto asli dari shopee.co.id/beckycoo, pilih sa
    `https://down-id.img.susercontent.com/file/...`), lalu **Simpan**.
 2. Simpan file di `assets/products/`, mis. `assets/products/BC-TS01-BLK.jpg`, lalu tempel path itu di kolom URL foto yang sama.
 
-Nama, warna, dan harga produk di `js/seed.js` adalah placeholder — ganti dengan katalog asli.
+Nama, warna, dan harga produk di `data/demo-data.js` adalah contoh; ganti dengan katalog asli.
 
 ## Struktur
 ```
@@ -75,11 +89,14 @@ tools/build-tokens.py  generator tokens.json
 docs/                  design-system.html, HANDOFF.md
 js/auth.js             login dan sesi
 js/intro.js            logo (FX.logo) dan animasi intro
-js/tour.js             tur interaktif per peran
+js/tour.js             panduan interaktif (per peran dan per modul)
+js/modules.js          isi 7 modul belajar
+js/reports.js          laporan staf ke PIC (stok, pesanan, kas)
+data/demo-data.js      satu-satunya sumber data simulasi
 js/arrivals.js         pesanan contoh yang masuk setiap login
 assets/logo/           berkas logo SVG
-js/util.js             format Rupiah/tanggal, PRNG
-js/seed.js             data awal ("impor dari spreadsheet")
+js/util.js             format Rupiah/tanggal, pengacak berbenih, id berurutan
+js/seed.js             menyusun kondisi awal dari data/demo-data.js
 js/store.js            satu sumber data + semua aksi bisnis + rekonsiliasi + notifikasi
 js/forecast.js         Holt smoothing, safety stock, titik pesan, MOQ, sebaran ukuran
 js/ui.js               komponen, drawer, toast, grafik SVG

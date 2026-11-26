@@ -38,15 +38,16 @@
       const pct = (v) => (sales ? Math.round((v / sales) * 100) + '%' : '—');
 
       return (
-        (!S.can('ledger.add') ? ui.readonly('Entri otomatis dibuat sistem; entri manual hanya oleh PIC Keuangan atau Owner.') : '') +
+        (!S.can('ledger.add') ? ui.readonly('Sebagian besar entri dibuat otomatis oleh sistem. Entri manual hanya dapat dibuat oleh PIC Keuangan atau Owner. Jika menemukan selisih, kirim laporan ke PIC Keuangan.') : '') +
         '<div class="toolbar"><div class="seg">' + [[7, '7 hari'], [30, '30 hari'], [90, '90 hari']].map(([k, l]) => '<button data-r="' + k + '" class="' + (range === k ? 'on' : '') + '">' + l + '</button>').join('') + '</div><span style="flex:1"></span>' +
+        FX.reports.button('kas') +
         (S.can('ledger.add') ? '<button class="btn primary" data-act="add">' + ui.icon('plus', 15) + 'Entri manual</button>' : '') + '</div>' +
 
         '<section class="kpis" style="grid-template-columns:repeat(4,1fr)">' +
         '<div class="kpi"><div class="lbl">Saldo kas</div><div class="v">' + FX.rp(S.cash()) + '</div><div class="d">semua periode</div></div>' +
         '<div class="kpi"><div class="lbl">Penjualan ' + range + ' hari</div><div class="v">' + FX.rpShort(sales) + '</div><div class="d">diakui saat diserahkan ke kurir</div></div>' +
         '<div class="kpi"><div class="lbl">Arus kas bersih</div><div class="v" style="color:' + (net < 0 ? 'var(--color-status-critical)' : 'inherit') + '">' + (net < 0 ? '−' : '') + FX.rpShort(Math.abs(net)) + '</div><div class="d">setelah produksi & operasional</div></div>' +
-        '<div class="kpi"><div class="lbl">Entri otomatis</div><div class="v">' + auto + ' / ' + inRange.length + '</div><div class="d">tidak diketik ulang dari spreadsheet</div></div>' +
+        '<div class="kpi"><div class="lbl">Entri otomatis</div><div class="v">' + auto + ' / ' + inRange.length + '</div><div class="d">tanpa diketik ulang dari spreadsheet</div></div>' +
         '</section>' +
 
         '<div class="grid g-2">' +
@@ -75,10 +76,12 @@
               '<td class="r num">' + (j.type === 'in' ? FX.rp(j.amount) : '') + '</td><td class="r num">' + (j.type === 'out' ? FX.rp(j.amount) : '') + '</td></tr>',
           )
           .join('') +
-        '</tbody></table></div></section>'
+        '</tbody></table></div></section>' +
+        FX.reports.panel('kas', { hideEmpty: !['owner', 'pic_keuangan', 'staf_keuangan'].includes(S.role) })
       );
     },
     mount(el) {
+      FX.reports.mount(el);
       el.querySelectorAll('[data-r]').forEach((b) => (b.onclick = () => ((range = +b.dataset.r), FX.app.render())));
       el.querySelector('#cat').onchange = (e) => ((cat = e.target.value), FX.app.render());
       const add = el.querySelector('[data-act="add"]');
@@ -97,23 +100,23 @@
   function openAdd() {
     ui.drawer({
       title: 'Entri kas manual',
-      sub: 'Untuk transaksi di luar stok dan pesanan — gaji, sewa, iklan, dsb.',
+      sub: 'Untuk transaksi di luar stok dan pesanan, seperti gaji, sewa, atau iklan.',
       body:
         '<div class="form-grid">' +
         '<label class="field"><span>Jenis</span><select id="lg-t"><option value="out">Pengeluaran</option><option value="in">Pemasukan</option></select></label>' +
         '<label class="field"><span>Kategori</span><select id="lg-c"><option value="operasional">Operasional</option><option value="lainnya">Lainnya</option><option value="modal">Modal</option></select></label>' +
         '<label class="field full"><span>Jumlah (Rp)</span><input id="lg-a" type="number" min="0" step="1000" inputmode="numeric"></label>' +
         '<label class="field full"><span>Keterangan</span><input id="lg-n" placeholder="mis. Iklan Shopee Ads minggu 47"></label>' +
-        '</div><div class="callout">Penjualan, biaya platform, dan biaya produksi <b>tidak perlu</b> diinput di sini — sudah tercatat otomatis dari pesanan dan barang masuk.</div>',
+        '</div><div class="callout">Penjualan, biaya platform, dan biaya produksi <b>tidak perlu</b> diinput di sini karena sudah tercatat otomatis dari pesanan dan barang masuk.</div>',
       foot: '<button class="btn" data-close>Batal</button><button class="btn primary" id="lg-go">Simpan</button>',
       onMount(d) {
         d.querySelector('#lg-go').onclick = () => {
           const amount = parseFloat(d.querySelector('#lg-a').value);
           const note = d.querySelector('#lg-n').value.trim();
-          if (!amount || !note) return ui.toast('Isi jumlah dan keterangan.', 'bad');
+          if (!amount || !note) return ui.toast('Silakan isi jumlah dan keterangan.', 'bad');
           S.addLedger({ type: d.querySelector('#lg-t').value, category: d.querySelector('#lg-c').value, amount, note });
           ui.closeDrawer();
-          ui.toast('Entri tersimpan.', '', 'Kas');
+          ui.toast('Entri kas berhasil disimpan.', '', 'Kas');
         };
       },
     });

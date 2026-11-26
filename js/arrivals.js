@@ -15,13 +15,13 @@
   const MAX_WINDOW = 12 * FX.HOUR; // cap so overnight gaps don't empty the warehouse
 
   function rnd(a, b) {
-    return a + Math.random() * (b - a);
+    return a + FX.rand() * (b - a);
   }
 
   function weightedProduct() {
     const ps = S.state.products;
     const w = ps.map((p) => 1 + FX.forecast.one(p.id).perWeek);
-    let x = Math.random() * FX.sum(w);
+    let x = FX.rand() * FX.sum(w);
     for (let i = 0; i < ps.length; i++) if ((x -= w[i]) <= 0) return ps[i];
     return ps[0];
   }
@@ -30,8 +30,8 @@
     const inStock = FX.SIZES.filter((s) => p.stock[s] > 0);
     // Mostly buyers pick what is listed; sometimes they try a size that just sold out
     // (two buyers, one last unit). That attempt is held by the stock sync.
-    if (inStock.length && Math.random() < 0.85) return inStock[Math.floor(Math.random() * inStock.length)];
-    return FX.SIZES[Math.floor(Math.random() * 4)];
+    if (inStock.length && FX.rand() < 0.85) return inStock[Math.floor(FX.rand() * inStock.length)];
+    return FX.SIZES[Math.floor(FX.rand() * 4)];
   }
 
   FX.arrivals = {
@@ -39,7 +39,7 @@
     batchSize(lastBatch) {
       const max = S.state.settings.loginOrdersMax || 12;
       if (!lastBatch) return 3;
-      return Math.min(max, lastBatch + 1 + (Math.random() < 0.4 ? 1 : 0));
+      return Math.min(max, lastBatch + 1 + (FX.rand() < 0.4 ? 1 : 0));
     },
 
     onLogin(email) {
@@ -53,13 +53,13 @@
       const n = this.batchSize(st.logins.lastBatch);
 
       // Spread arrival times across the window, oldest first.
-      const times = Array.from({ length: n }, () => now - Math.random() * windowMs).sort((a, b) => a - b);
+      const times = Array.from({ length: n }, () => now - FX.rand() * windowMs).sort((a, b) => a - b);
       const result = { n, loginNo, from: now - windowMs, placed: [], blocked: [], byChannel: { shopee: 0, tokopedia: 0 } };
 
       times.forEach((at) => {
-        const channel = Math.random() < 0.68 ? 'shopee' : 'tokopedia';
+        const channel = FX.rand() < 0.68 ? 'shopee' : 'tokopedia';
         const items = [];
-        const count = Math.random() < 0.18 ? 2 : 1;
+        const count = FX.rand() < 0.18 ? 2 : 1;
         for (let k = 0; k < count; k++) {
           const p = weightedProduct();
           const size = pickSize(p);
@@ -67,10 +67,10 @@
           items.push({ pid: p.id, size, qty: 1, price: p.price });
         }
         const couriers = st.couriers[channel];
-        const courier = couriers[Math.floor(Math.random() * couriers.length)];
+        const courier = couriers[Math.floor(FX.rand() * couriers.length)];
         const instant = /Instant|Same Day/.test(courier);
         const res = S.replay(at, 'Marketplace', () =>
-          S.placeOrder({ channel, items, buyer: st.buyers[Math.floor(Math.random() * st.buyers.length)], courier, shipHours: instant ? rnd(2, 3.5) : rnd(10, 30) }),
+          S.placeOrder({ channel, items, buyer: st.buyers[Math.floor(FX.rand() * st.buyers.length)], courier, shipHours: instant ? rnd(2, 3.5) : rnd(10, 30) }),
         );
         if (res.ok) {
           result.placed.push(res.order);
@@ -82,7 +82,7 @@
       st.logins.lastBatch = n;
       st.logins.last = now;
       st.logins.byAccount[email] = (st.logins.byAccount[email] || 0) + 1;
-      S._log('Sinkronisasi saat masuk: ' + result.placed.length + ' pesanan baru dari marketplace' + (result.blocked.length ? ', ' + result.blocked.length + ' checkout ditahan karena stok habis' : '') + '.', 'order');
+      S._log('Sinkronisasi saat masuk: ' + result.placed.length + ' pesanan baru dari marketplace' + (result.blocked.length ? ', ' + result.blocked.length + ' checkout ditolak karena stok habis' : '') + '.', 'order');
       S.commit();
       return result;
     },
@@ -110,12 +110,12 @@
         '<div class="arrivals-stats">' +
         '<div><div class="big">' + r.placed.length + '</div><div class="lbl">pesanan baru</div></div>' +
         '<div><div class="big">' + r.byChannel.shopee + '<span class="arr-split">/</span>' + r.byChannel.tokopedia + '</div><div class="lbl">Shopee / Tokopedia</div></div>' +
-        '<div><div class="big" style="' + (r.blocked.length ? 'color:var(--color-status-critical)' : '') + '">' + r.blocked.length + '</div><div class="lbl">checkout ditahan</div></div>' +
+        '<div><div class="big" style="' + (r.blocked.length ? 'color:var(--color-status-critical)' : '') + '">' + r.blocked.length + '</div><div class="lbl">checkout ditolak</div></div>' +
         '</div>' +
-        '<p class="ink2" style="margin:0">Masuk sejak ' + FX.fmtTime(r.from) + '. Stok sudah dikurangi dan kedua kanal sudah disinkronkan. Ini masuk ke-' + r.loginNo + ' dengan ' + r.n + ' pesanan; berikutnya akan lebih banyak' + (r.n >= (S.state.settings.loginOrdersMax || 12) ? ' (sudah di batas maksimum)' : '') + '.</p>' +
-        (late.length || soon.length ? '<div class="callout' + (late.length ? ' critical' : '') + '"><b>' + (late.length ? late.length + ' sudah lewat batas serah kurir' : soon.length + ' harus diserahkan dalam 3 jam') + '.</b> Kerjakan dari atas antrean Pesanan.</div>' : '') +
+        '<p class="ink2" style="margin:0">Masuk sejak ' + FX.fmtTime(r.from) + '. Stok sudah dikurangi dan kedua marketplace sudah disinkronkan. Ini masuk ke-' + r.loginNo + ' dengan ' + r.n + ' pesanan; jumlahnya akan bertambah pada kesempatan berikutnya' + (r.n >= (S.state.settings.loginOrdersMax || 12) ? ' (sudah di batas maksimum)' : '') + '.</p>' +
+        (late.length || soon.length ? '<div class="callout' + (late.length ? ' critical' : '') + '"><b>' + (late.length ? late.length + ' sudah lewat batas serah kurir' : soon.length + ' harus diserahkan dalam 3 jam') + '.</b> Kerjakan dari urutan teratas di halaman Pesanan.</div>' : '') +
         (rows ? '<div class="panel"><table class="t"><thead><tr><th>Kanal</th><th>Barang</th><th>Masuk</th><th class="r">Batas serah</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '') +
-        (r.blocked.length ? '<p class="tok" style="margin:0">Checkout ditahan: ' + r.blocked.map((b) => esc(b.reason) + ' (' + FX.CHANNELS[b.channel].name + ')').join(', ') + '. Tanpa sinkronisasi, ini akan menjadi pesanan yang dibatalkan sepihak.</p>' : '') +
+        (r.blocked.length ? '<p class="tok" style="margin:0">Checkout ditolak otomatis: ' + r.blocked.map((b) => esc(b.reason) + ' (' + FX.CHANNELS[b.channel].name + ')').join(', ') + '. Tanpa sinkronisasi, transaksi ini akan menjadi pesanan yang dibatalkan sepihak.</p>' : '') +
         '</div>'
       );
     },
@@ -126,7 +126,7 @@
       const canOrders = S.SCREENS[S.role].includes('pesanan');
       const d = FX.ui.drawer({
         title: 'Selamat datang kembali',
-        sub: 'Pesanan yang masuk selama Anda tidak membuka Fluxora',
+        sub: 'Pesanan yang masuk sejak terakhir kali Anda membuka Fluxora',
         body: this.summaryHtml(r),
         foot: '<button class="btn" data-close>Tutup</button>' + (canOrders ? '<button class="btn primary" id="arr-go">Buka Pesanan</button>' : ''),
       });

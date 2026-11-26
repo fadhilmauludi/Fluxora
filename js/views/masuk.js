@@ -22,7 +22,7 @@
       const openValue = FX.sum(open, (po) => FX.sizeTotal(po.qty) * po.unitCost);
 
       return (
-        (!canRecv && !canPO ? ui.readonly('PO dibuat oleh Owner dan barang diterima oleh PIC Gudang. Biaya produksi otomatis masuk buku kas saat barang diterima.') : '') +
+        (!canRecv && !canPO ? ui.readonly('PO dibuat oleh Owner dan barang diterima oleh PIC Gudang. Biaya produksi tercatat otomatis di buku kas saat barang diterima.') : '') +
         '<div class="toolbar"><span class="note">' + open.length + ' PO dalam produksi, nilai ' + FX.rp(openValue) + '</span><span style="flex:1"></span>' +
         (canPO ? '<button class="btn" data-act="po">' + ui.icon('plus', 15) + 'Buat PO ke maklon</button>' : '') +
         (canRecv ? '<button class="btn primary" data-act="free">' + ui.icon('box', 15) + 'Barang masuk tanpa PO</button>' : '') +
@@ -77,7 +77,7 @@
       const pid = (prefill && prefill.pid) || st.products[0].id;
       ui.drawer({
         title: 'PO ke maklon',
-        sub: prefill ? 'Diisi dari rekomendasi forecast — silakan sesuaikan' : 'Pesanan produksi baru',
+        sub: prefill ? 'Terisi dari rekomendasi forecast dan dapat disesuaikan' : 'Pesanan produksi baru',
         body:
           '<div class="form-grid">' +
           '<label class="field full"><span>Model</span><select id="po-p">' + st.products.map((p) => '<option value="' + p.id + '"' + (p.id === pid ? ' selected' : '') + '>' + esc(p.name + ' — ' + p.color) + '</option>').join('') + '</select></label>' +
@@ -107,7 +107,7 @@
           recalc();
           d.querySelector('#po-go').onclick = () => {
             const { qty, tot } = recalc();
-            if (!tot) return ui.toast('Isi jumlah minimal satu ukuran.', 'bad');
+            if (!tot) return ui.toast('Isi jumlah untuk minimal satu ukuran.', 'bad');
             const po = S.createPO({
               pid: d.querySelector('#po-p').value,
               qty,
@@ -130,7 +130,7 @@
     const p0 = po ? S.product(po.pid) : st.products[0];
     ui.drawer({
       title: po ? 'Terima ' + po.id : 'Catat barang masuk',
-      sub: po ? esc(p0.name + ' — ' + p0.color) + ' dari ' + esc(po.vendor.split(' — ')[0]) : 'Untuk barang yang datang tanpa PO di sistem',
+      sub: po ? esc(p0.name + ' — ' + p0.color) + ' dari ' + esc(po.vendor.split(' — ')[0]) : 'Untuk barang yang datang tanpa PO, misalnya retur atau kiriman tambahan',
       body:
         '<div class="form-grid">' +
         (po ? '' : '<label class="field full"><span>Model</span><select id="rc-p">' + st.products.map((p) => '<option value="' + p.id + '">' + esc(p.name + ' — ' + p.color) + '</option>').join('') + '</select></label>') +
@@ -163,7 +163,7 @@
         recalc();
         d.querySelector('#rc-go').onclick = () => {
           const { qty, tot } = recalc();
-          if (!tot) return ui.toast('Isi jumlah minimal satu ukuran.', 'bad');
+          if (!tot) return ui.toast('Isi jumlah untuk minimal satu ukuran.', 'bad');
           S.receiveStock({
             pid: pidOf(),
             qty,
@@ -173,7 +173,7 @@
             note: d.querySelector('#rc-n').value.trim(),
           });
           ui.closeDrawer();
-          ui.toast(tot + ' pcs masuk. Stok, listing kedua kanal, dan buku kas sudah diperbarui.', '', 'Barang masuk');
+          ui.toast(tot + ' pcs telah dicatat. Stok, listing di kedua marketplace, dan buku kas sudah diperbarui.', '', 'Barang masuk');
         };
       },
     });

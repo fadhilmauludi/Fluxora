@@ -52,19 +52,22 @@
         .join('');
 
       return (
-        (readOnly ? ui.readonly('Staf melihat antrean pesanan dan menandai yang sudah dicek fisik. Status kirim diubah oleh PIC.') : '') +
-        (late.length ? '<div class="callout critical" role="alert"><b>' + late.length + ' pesanan lewat batas serah kurir.</b> Marketplace bisa membatalkan otomatis dengan alasan “penjual tidak mengatur pengiriman tepat waktu”. Serahkan sekarang atau hubungi pembeli.</div>' : '') +
+        (readOnly ? ui.readonly(S.role === 'staf_admin' ? 'Gunakan antrean ini untuk menjawab pertanyaan pembeli dengan data yang sama seperti di marketplace. Jika ada kendala, kirim laporan ke PIC Admin Toko.' : 'Tandai pesanan yang barangnya sudah Anda cek di rak. Status pengiriman diubah oleh PIC Gudang.') : '') +
+        (late.length ? '<div class="callout critical" role="alert"><b>' + late.length + ' pesanan lewat batas serah kurir.</b> Marketplace dapat membatalkannya secara otomatis dengan alasan “penjual tidak mengatur pengiriman tepat waktu”. Segera serahkan ke kurir atau hubungi pembeli.</div>' : '') +
         '<div class="tabs">' + TABS.map(([k, l]) => '<button data-tab="' + k + '" class="' + (tab === k ? 'on' : '') + '">' + l + ' <span class="n">' + counts[k] + '</span></button>').join('') + '</div>' +
         '<div class="toolbar"><div class="seg">' + [['semua', 'Semua kanal'], ['shopee', 'Shopee'], ['tokopedia', 'Tokopedia']].map(([k, l]) => '<button data-ch="' + k + '" class="' + (channel === k ? 'on' : '') + '">' + l + '</button>').join('') + '</div>' +
         '<span class="muted" style="font-size:12.5px">' + (tab === 'baru' || tab === 'dikemas' ? 'Diurutkan dari batas serah kurir paling dekat' : 'Terbaru di atas') + '</span><span style="flex:1"></span>' +
+        (S.role !== 'staf' ? FX.reports.button('pesanan') : '') +
         (S.can('order.ship') && checkedReady.length > 1 ? '<button class="btn primary" data-a="ship-all">' + ui.icon('truck', 15) + 'Serahkan ' + checkedReady.length + ' yang sudah dicek</button>' : '') +
         '</div>' +
         '<section class="panel scroll-x"><table class="t"><thead><tr><th>Kanal</th><th>Barang</th><th>Pembeli dan kurir</th><th>Masuk</th><th>' + (tab === 'baru' || tab === 'dikemas' ? 'Batas serah' : tab === 'batal' ? 'Alasan' : 'Resi') + '</th><th>Status</th><th></th></tr></thead><tbody>' +
-        (rows || '<tr><td colspan="7" class="empty">Kosong. Coba tombol <b>Pesanan Shopee</b> atau <b>Pesanan Tokopedia</b> di atas untuk mensimulasikan pesanan masuk.</td></tr>') +
-        '</tbody></table></section>'
+        (rows || '<tr><td colspan="7" class="empty">Belum ada pesanan pada status ini. Gunakan tombol <b>Pesanan Shopee</b> atau <b>Pesanan Tokopedia</b> di bagian atas untuk mensimulasikan pesanan masuk.</td></tr>') +
+        '</tbody></table></section>' +
+        FX.reports.panel('pesanan', { hideEmpty: !['owner', 'pic_admin', 'staf_admin'].includes(S.role) })
       );
     },
     mount(el, ref) {
+      FX.reports.mount(el);
       el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => ((tab = b.dataset.tab), FX.app.render())));
       el.querySelectorAll('[data-ch]').forEach((b) => (b.onclick = () => ((channel = b.dataset.ch), FX.app.render())));
       el.querySelectorAll('[data-open]').forEach((tr) =>
@@ -98,13 +101,13 @@
     if (a === 'ship-all') {
       const ids = S.state.orders.filter((o) => o.checked && o.status === tab && (channel === 'semua' || o.channel === channel)).map((o) => o.id);
       ids.forEach((x) => S.shipOrder(x));
-      ui.toast(ids.length + ' pesanan diserahkan ke kurir. Resi dan kas diperbarui.', '', 'Diserahkan');
+      ui.toast(ids.length + ' pesanan diserahkan ke kurir. Resi dan buku kas telah diperbarui.', '', 'Diserahkan');
     }
     if (a === 'cancel') {
       const reason = document.getElementById('cancel-reason');
       S.cancelOrder(id, (reason && reason.value) || 'Permintaan pembeli');
       ui.closeDrawer();
-      ui.toast('Pesanan dibatalkan. Stok dikembalikan dan disinkronkan.', '', 'Batal');
+      ui.toast('Pesanan dibatalkan. Stok telah dikembalikan dan disinkronkan ke kedua marketplace.', '', 'Batal');
     }
   }
 

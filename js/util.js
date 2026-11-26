@@ -24,8 +24,28 @@
     };
   };
 
+  // Sequential ids kept in the state, so the same steps give the same ids everywhere.
   FX.uid = function (prefix) {
-    return prefix + '-' + Date.now().toString(36).slice(-5) + Math.random().toString(36).slice(2, 5);
+    const st = FX.store && FX.store.state;
+    let n;
+    if (FX._seedSeq != null) n = ++FX._seedSeq;
+    else if (st) n = st.seq = (st.seq || 0) + 1;
+    else n = Date.now();
+    return prefix + '-' + n.toString(36).toUpperCase().padStart(4, '0');
+  };
+
+  // Simulation randomiser. Seeded from data/demo-data.js and stored in the state,
+  // so a demo plays out identically in every browser for the same sequence of actions.
+  FX.rand = function () {
+    const st = FX.store && FX.store.state;
+    let a = st && st.rng != null ? st.rng : (FX._rngFallback = FX._rngFallback || 0x2545f491);
+    a = (a + 0x6d2b79f5) >>> 0;
+    if (st && st.rng != null) st.rng = a;
+    else FX._rngFallback = a;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 
   const idr = new Intl.NumberFormat('id-ID');

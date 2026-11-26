@@ -6,13 +6,19 @@
   const KEY = 'fluxora.beckycoo.session';
   const PASSWORD = 'beckycoo';
 
+  // Simulation accounts, one per role. Grouped as on the "Kelompok pengguna" slide.
   const ACCOUNTS = [
-    { email: 'owner@beckycoo.id', name: 'Owner Beckycoo', role: 'owner', initials: 'OW', scope: 'Semua menu, keputusan PO' },
-    { email: 'gudang@beckycoo.id', name: 'PIC Gudang', role: 'pic_gudang', initials: 'PG', scope: 'Barang masuk, kirim pesanan' },
-    { email: 'admin@beckycoo.id', name: 'PIC Admin Toko', role: 'pic_admin', initials: 'PA', scope: 'Pesanan, listing produk' },
-    { email: 'keuangan@beckycoo.id', name: 'PIC Keuangan', role: 'pic_keuangan', initials: 'PK', scope: 'Buku kas, rekonsiliasi' },
-    { email: 'staf@beckycoo.id', name: 'Staf Gudang', role: 'staf', initials: 'SG', scope: 'Lihat, cek fisik, lapor' },
+    { email: 'owner@beckycoo.id', name: 'Owner Beckycoo', role: 'owner', initials: 'OW', scope: 'Seluruh menu dan keputusan PO' },
+    { email: 'gudang@beckycoo.id', name: 'PIC Gudang', role: 'pic_gudang', initials: 'PG', scope: 'Barang masuk, opname, pengiriman' },
+    { email: 'admin@beckycoo.id', name: 'PIC Admin Toko', role: 'pic_admin', initials: 'PA', scope: 'Pesanan dan listing produk' },
+    { email: 'keuangan@beckycoo.id', name: 'PIC Keuangan', role: 'pic_keuangan', initials: 'PK', scope: 'Buku kas dan rekonsiliasi' },
+    { email: 'stafgudang@beckycoo.id', name: 'Staf Gudang', role: 'staf', initials: 'SG', scope: 'Lihat stok, cek fisik, lapor' },
+    { email: 'stafadmin@beckycoo.id', name: 'Staf Admin Toko', role: 'staf_admin', initials: 'SA', scope: 'Lihat pesanan dan stok, lapor' },
+    { email: 'stafkeuangan@beckycoo.id', name: 'Staf Keuangan', role: 'staf_keuangan', initials: 'SK', scope: 'Lihat buku kas, lapor' },
   ];
+  // Earlier address for Staf Gudang, still accepted so saved sessions keep working.
+  const ALIASES = { 'staf@beckycoo.id': 'stafgudang@beckycoo.id' };
+  const findAccount = (email) => ACCOUNTS.find((a) => a.email === (ALIASES[email] || email));
 
   let memory = null; // fallback when storage is unavailable (sandboxed viewers)
 
@@ -28,15 +34,15 @@
     },
     account() {
       const s = auth.session();
-      return s && ACCOUNTS.find((a) => a.email === s.email);
+      return s && findAccount(s.email);
     },
     /** Returns null on success, or an error message written for the user. */
     login(email, password, remember) {
       email = (email || '').trim().toLowerCase();
-      if (!email || !password) return 'Isi email dan kata sandi.';
-      const acc = ACCOUNTS.find((a) => a.email === email);
-      if (!acc) return 'Email ini tidak terdaftar di tim Beckycoo. Periksa ejaannya atau pilih akun demo di bawah.';
-      if (password !== PASSWORD) return 'Kata sandi salah. Untuk prototipe ini, kata sandinya beckycoo.';
+      if (!email || !password) return 'Silakan isi email dan kata sandi.';
+      const acc = findAccount(email);
+      if (!acc) return 'Email ini belum terdaftar sebagai anggota tim Beckycoo. Periksa kembali penulisannya, atau pilih salah satu akun simulasi di bawah.';
+      if (password !== PASSWORD) return 'Kata sandi tidak sesuai. Untuk versi simulasi ini, semua akun memakai kata sandi beckycoo.';
       memory = { email: acc.email, at: Date.now() };
       try {
         (remember ? localStorage : sessionStorage).setItem(KEY, JSON.stringify(memory));

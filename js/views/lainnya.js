@@ -41,19 +41,24 @@
       const set = st.settings;
       const owner = S.role === 'owner';
       const canEdit = S.can('product.edit');
+      // Columns follow S.ROLES: Owner, PIC Gudang, PIC Admin, PIC Keuangan, Staf Gudang, Staf Admin, Staf Keuangan
       const perms = [
-        ['Lihat stok & pesanan', 1, 1, 1, 1, 1],
-        ['Cek fisik & lapor selisih', 1, 0, 0, 0, 1],
-        ['Catat barang masuk / opname', 1, 1, 0, 0, 0],
-        ['Kemas & serahkan ke kurir', 1, 1, 0, 0, 0],
-        ['Batalkan pesanan', 1, 0, 1, 0, 0],
-        ['Ubah listing & foto', 1, 0, 1, 0, 0],
-        ['Entri kas manual', 1, 0, 0, 1, 0],
-        ['Lihat keuangan', 1, 0, 0, 1, 0],
-        ['Buat PO ke maklon', 1, 0, 0, 0, 0],
+        ['Melihat stok', 1, 1, 1, 1, 1, 1, 1],
+        ['Melihat antrean pesanan', 1, 1, 1, 0, 1, 1, 0],
+        ['Melihat buku kas', 1, 0, 0, 1, 0, 0, 1],
+        ['Cek fisik pesanan dan lapor selisih stok', 0, 0, 0, 0, 1, 0, 0],
+        ['Lapor kendala pesanan atau listing', 0, 0, 0, 0, 0, 1, 0],
+        ['Lapor selisih kas', 0, 0, 0, 0, 0, 0, 1],
+        ['Menindaklanjuti laporan staf', 1, 1, 1, 1, 0, 0, 0],
+        ['Mencatat barang masuk dan opname', 1, 1, 0, 0, 0, 0, 0],
+        ['Mengemas dan menyerahkan ke kurir', 1, 1, 0, 0, 0, 0, 0],
+        ['Membatalkan pesanan', 1, 0, 1, 0, 0, 0, 0],
+        ['Mengubah listing dan foto', 1, 0, 1, 0, 0, 0, 0],
+        ['Membuat entri kas manual', 1, 0, 0, 1, 0, 0, 0],
+        ['Membuat PO ke maklon', 1, 0, 0, 0, 0, 0, 0],
       ];
       return (
-        '<section class="panel"><div class="panel-h"><h2>Foto & listing produk</h2><span class="meta">tempel URL gambar dari toko Shopee Beckycoo, atau path file di <span class="mono">assets/products/</span></span></div>' +
+        '<section class="panel"><div class="panel-h"><h2>Foto dan listing produk</h2><span class="meta">tempel alamat gambar dari toko Shopee Beckycoo, atau lokasi berkas di <span class="mono">assets/products/</span></span></div>' +
         '<div class="scroll-x"><table class="t"><thead><tr><th>Model</th><th>URL foto</th><th class="r">Harga jual</th><th class="r">HPP</th><th></th></tr></thead><tbody>' +
         st.products
           .map(
@@ -80,13 +85,14 @@
             field('feeShopee', 'Biaya layanan Shopee (%)', +(set.fees.shopee * 100).toFixed(2), '', 0.1) +
             field('feeTokopedia', 'Biaya layanan Tokopedia (%)', +(set.fees.tokopedia * 100).toFixed(2), '', 0.1) +
             '</div><div class="btns" style="margin-top:16px"><button class="btn primary" id="set-save">Simpan parameter</button></div></div></section>' +
-            '<section class="panel"><div class="panel-h"><h2>Data demo</h2></div><div class="panel-b"><p class="ink2" style="margin-top:0">Semua data tersimpan di browser ini (localStorage). Reset mengembalikan kondisi awal: impor dari spreadsheet, 12 minggu riwayat, 12 pesanan terbuka, dan 1 PO dalam produksi.</p>' +
-            '<p class="ink2">Integrasi asli memakai <b>Shopee Open Platform</b> dan <b>Tokopedia Open API</b>: webhook pesanan memanggil aksi yang sama dengan tombol simulasi, dan setiap perubahan stok dikirim balik lewat endpoint update stok per variasi.</p>' +
-            '<button class="btn danger" id="reset">Reset data demo</button></div></section></div>'
+            '<section class="panel"><div class="panel-h"><h2>Data simulasi</h2><span class="meta">' + esc(FX.DEMO.label) + '</span></div><div class="panel-b"><p class="ink2" style="margin-top:0">Seluruh halaman membaca kondisi awal dari <b>satu berkas data simulasi terpusat</b> (<span class="mono">data/demo-data.js</span>): katalog ' + st.products.length + ' model, riwayat penjualan 12 minggu, buku kas, ' + FX.DEMO.openOrders.length + ' pesanan berjalan, dan ' + FX.DEMO.purchaseOrders.length + ' PO dalam produksi. Setiap browser memulai dengan angka yang sama.</p>' +
+            '<p class="ink2">Perubahan selama demo disimpan di browser ini. Tombol di bawah mengembalikan semua data ke kondisi awal dari berkas tersebut.</p>' +
+            '<p class="ink2">Pada tahap integrasi, pesanan akan diterima dari <b>Shopee Open Platform</b> dan <b>Tokopedia Open API</b> melalui proses yang sama dengan tombol simulasi, dan setiap perubahan stok dikirim kembali ke masing-masing marketplace.</p>' +
+            '<button class="btn danger" id="reset">Atur ulang data demo</button></div></section></div>'
           : '') +
 
         '<section class="panel"><div class="panel-h"><h2>Sistem desain</h2><span class="meta">token, komponen, dan semua state yang dipakai layar ini</span><span class="spacer"></span><a class="btn sm" href="docs/design-system.html">Buka sistem desain</a></div></section>' +
-        '<section class="panel scroll-x"><div class="panel-h"><h2>Hak akses</h2><span class="meta">ganti peran di kiri bawah untuk mencoba</span></div><table class="t perm-table"><thead><tr><th>Aksi</th>' +
+        '<section class="panel scroll-x"><div class="panel-h"><h2>Hak akses</h2><span class="meta">ringkasan wewenang ketujuh akun simulasi</span></div><table class="t perm-table"><thead><tr><th>Aksi</th>' +
         Object.values(S.ROLES).map((r) => '<th>' + r.label + '</th>').join('') + '</tr></thead><tbody>' +
         perms.map((r) => '<tr><td>' + r[0] + '</td>' + r.slice(1).map((v) => '<td>' + (v ? '<span class="yes">✓</span>' : '<span class="no">—</span>') + '</td>').join('') + '</tr>').join('') +
         '</tbody></table></section>'
@@ -102,7 +108,7 @@
             const p = S.product(id);
             if (img.trim() !== p.img) S.setProductImage(id, img);
             if (price && price !== p.price) S.updateProduct(id, { price });
-            ui.toast('Listing ' + p.sku + ' disimpan dan dikirim ke kedua kanal.', '', 'Listing');
+            ui.toast('Listing ' + p.sku + ' telah disimpan dan dikirim ke kedua marketplace.', '', 'Listing');
           }),
       );
       const save = el.querySelector('#set-save');
@@ -120,10 +126,10 @@
             loginOrdersMax: Math.max(3, Math.min(40, v('loginOrdersMax') || 12)),
             fees: { shopee: v('feeShopee') / 100, tokopedia: v('feeTokopedia') / 100 },
           });
-          ui.toast('Parameter disimpan. Forecast dan peringatan stok dihitung ulang.', '', 'Pengaturan');
+          ui.toast('Parameter telah disimpan. Forecast dan peringatan stok dihitung ulang.', '', 'Pengaturan');
         };
       const reset = el.querySelector('#reset');
-      if (reset) reset.onclick = () => ui.confirm('Reset data demo?', 'Semua pesanan, PO, dan entri kas yang dibuat selama demo akan dihapus.', 'Reset', () => (S.reset(), ui.toast('Data demo dikembalikan ke kondisi awal.', '', 'Reset')));
+      if (reset) reset.onclick = () => ui.confirm('Atur ulang data demo?', 'Semua pesanan, PO, dan entri kas yang dibuat selama demo akan dihapus, lalu data dimuat ulang dari berkas data simulasi.', 'Atur ulang', () => (S.reset(), ui.toast('Data demo telah dikembalikan ke kondisi awal.', '', 'Atur ulang')));
     },
   };
 

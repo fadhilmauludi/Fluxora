@@ -5,22 +5,32 @@
    That is the whole idea of the product — one event, one write, no re-typing. */
 (function () {
   const FX = window.FX;
-  const KEY = 'fluxora.beckycoo.v3';
+  const KEY = 'fluxora.beckycoo.v4';
 
   const ROLES = {
-    owner: { label: 'Founder / Owner', who: 'Owner', can: ['*'] },
-    pic_gudang: { label: 'PIC Gudang', who: 'PIC Gudang', can: ['stock.receive', 'stock.adjust', 'order.pack', 'order.ship', 'report.resolve'] },
-    pic_admin: { label: 'PIC Admin Toko', who: 'PIC Admin', can: ['order.pack', 'order.cancel', 'product.edit', 'report.resolve'] },
-    pic_keuangan: { label: 'PIC Keuangan', who: 'PIC Keuangan', can: ['ledger.add', 'po.pay'] },
-    staf: { label: 'Staf Gudang', who: 'Staf Gudang', can: ['order.check', 'report.add'] },
+    owner: { label: 'Founder / Owner', who: 'Owner', group: 'Founder / Owner', can: ['*'] },
+    pic_gudang: { label: 'PIC Gudang', who: 'PIC Gudang', group: 'PIC', can: ['stock.receive', 'stock.adjust', 'order.pack', 'order.ship', 'report.resolve'] },
+    pic_admin: { label: 'PIC Admin Toko', who: 'PIC Admin Toko', group: 'PIC', can: ['order.pack', 'order.cancel', 'product.edit', 'report.resolve'] },
+    pic_keuangan: { label: 'PIC Keuangan', who: 'PIC Keuangan', group: 'PIC', can: ['ledger.add', 'po.pay', 'report.resolve'] },
+    staf: { label: 'Staf Gudang', who: 'Staf Gudang', group: 'Staf', reportTo: 'pic_gudang', can: ['order.check', 'report.add'] },
+    staf_admin: { label: 'Staf Admin Toko', who: 'Staf Admin Toko', group: 'Staf', reportTo: 'pic_admin', can: ['report.add'] },
+    staf_keuangan: { label: 'Staf Keuangan', who: 'Staf Keuangan', group: 'Staf', reportTo: 'pic_keuangan', can: ['report.add'] },
   };
-  // Which screens each role sees. Staff see operations read-only.
+  // Which screens each role sees. Staff see their department's screens in view mode.
   const SCREENS = {
     owner: ['ringkasan', 'stok', 'pesanan', 'masuk', 'keuangan', 'forecast', 'aktivitas', 'pengaturan', 'panduan'],
     pic_gudang: ['stok', 'pesanan', 'masuk', 'forecast', 'aktivitas', 'panduan'],
     pic_admin: ['pesanan', 'stok', 'aktivitas', 'pengaturan', 'panduan'],
     pic_keuangan: ['keuangan', 'masuk', 'stok', 'aktivitas', 'panduan'],
     staf: ['pesanan', 'stok', 'forecast', 'panduan'],
+    staf_admin: ['pesanan', 'stok', 'panduan'],
+    staf_keuangan: ['keuangan', 'stok', 'panduan'],
+  };
+  // Where a staff report lands: topic -> PIC who follows it up, and the screen it belongs to.
+  const REPORT_TOPICS = {
+    stok: { to: 'pic_gudang', screen: 'stok', label: 'Selisih stok' },
+    pesanan: { to: 'pic_admin', screen: 'pesanan', label: 'Pesanan dan listing' },
+    kas: { to: 'pic_keuangan', screen: 'keuangan', label: 'Selisih kas' },
   };
 
   const S = (FX.store = {
@@ -29,6 +39,7 @@
     listeners: [],
     ROLES,
     SCREENS,
+    REPORT_TOPICS,
 
     load() {
       try {
@@ -37,7 +48,7 @@
       } catch (e) {
         this.state = null;
       }
-      if (!this.state || this.state.version !== 3) this.state = FX.seed();
+      if (!this.state || this.state.version !== 4 || this.state.dataVersion !== FX.DEMO.version) this.state = FX.seed();
       this.save();
     },
     save() {
@@ -141,7 +152,7 @@
         const it = short[0];
         const p = this.product(it.pid);
         this.state.blocked += 1;
-        this._sync(channel, FX.CHANNELS[channel].name + ' ✕ checkout ditahan — ' + p.sku + ' ' + it.size + ' stok 0 di semua kanal', 'block');
+        this._sync(channel, FX.CHANNELS[channel].name + ' ✕ checkout ditolak — ' + p.sku + ' ' + it.size + ' stok 0 di semua kanal', 'block');
         this._log('Overselling dicegah: pembeli ' + FX.CHANNELS[channel].name + ' mencoba membeli ' + p.name + ' ' + it.size + ' yang sudah habis.', 'block');
         this.commit();
         return { ok: false, reason: p.name + ' ' + it.size + ' habis' };
@@ -150,7 +161,7 @@
       const o = {
         id: FX.uid('ORD'),
         channel,
-        extId: channel === 'shopee' ? FX.dayKey(now).slice(2).replace(/-/g, '') + Math.floor(1e7 + Math.random() * 8.9e7) + 'K' + String.fromCharCode(65 + Math.floor(Math.random() * 26)) : 'INV/' + FX.dayKey(now).replace(/-/g, '') + '/MPL/' + Math.floor(3e9 + Math.random() * 6e9),
+        extId: channel === 'shopee' ? FX.dayKey(now).slice(2).replace(/-/g, '') + Math.floor(1e7 + FX.rand() * 8.9e7) + 'K' + String.fromCharCode(65 + Math.floor(FX.rand() * 26)) : 'INV/' + FX.dayKey(now).replace(/-/g, '') + '/MPL/' + Math.floor(3e9 + FX.rand() * 6e9),
         buyer,
         createdAt: now,
         shipBy: now + (shipHours || 24) * FX.HOUR,
@@ -164,7 +175,7 @@
       this.state.orders.unshift(o);
       items.forEach((it) => this._move(it.pid, it.size, -it.qty, 'pesanan', o.id, channel));
       this._salesDay(items, channel, +1);
-      this._log('Pesanan ' + FX.CHANNELS[channel].name + ' ' + o.extId + ' masuk — stok otomatis dikurangi dan disinkronkan.', 'order');
+      this._log('Pesanan ' + FX.CHANNELS[channel].name + ' ' + o.extId + ' masuk. Stok otomatis dikurangi dan disinkronkan.', 'order');
       this.commit();
       return { ok: true, order: o };
     },
@@ -183,7 +194,7 @@
       const o = this.order(id);
       if (!o || (o.status !== 'baru' && o.status !== 'dikemas')) return;
       o.status = 'dikirim';
-      o.resi = (o.channel === 'shopee' ? 'SPXID0' : 'JP') + Math.floor(1e9 + Math.random() * 8.9e9);
+      o.resi = (o.channel === 'shopee' ? 'SPXID0' : 'JP') + Math.floor(1e9 + FX.rand() * 8.9e9);
       o.checked = true;
       o.history.push({ at: Date.now(), text: 'Diserahkan ke ' + o.courier + ' · resi ' + o.resi });
       const gross = FX.sum(o.items, (x) => x.price * x.qty);
@@ -211,7 +222,7 @@
       o.history.push({ at: Date.now(), text: 'Dibatalkan: ' + reason });
       o.items.forEach((it) => this._move(it.pid, it.size, +it.qty, 'batal', o.id, null));
       this._salesDay(o.items, o.channel, -1);
-      this._log('Pesanan ' + o.extId + ' dibatalkan (' + reason + '). Stok dikembalikan ke semua kanal.', 'warn');
+      this._log('Pesanan ' + o.extId + ' dibatalkan (' + reason + '). Stok dikembalikan ke kedua marketplace.', 'warn');
       this.commit();
     },
 
@@ -280,10 +291,20 @@
       this.commit();
     },
 
-    addReport(text) {
-      this.state.reports.unshift({ id: FX.uid('RP'), at: Date.now(), who: this.who(), text, status: 'open' });
-      this._log('Laporan ke PIC: ' + text, 'warn');
+    /** Staff report to a PIC. topic: 'stok' | 'pesanan' | 'kas'. */
+    addReport(text, topic) {
+      topic = REPORT_TOPICS[topic] ? topic : 'stok';
+      const to = REPORT_TOPICS[topic].to;
+      this.state.reports.unshift({ id: FX.uid('RP'), at: Date.now(), who: this.who(), role: this.role, to, topic, text, status: 'open' });
+      this._log('Laporan untuk ' + ROLES[to].label + ': ' + text, 'warn');
       this.commit();
+    },
+    /** Reports this role should see: the owner sees all, a PIC sees the ones addressed to them, staff see their own. */
+    reportsFor(topic) {
+      const role = this.role;
+      return this.state.reports.filter(
+        (r) => r.status === 'open' && (!topic || (r.topic || 'stok') === topic) && (role === 'owner' || r.to === role || r.role === role || (!r.to && role === 'pic_gudang')),
+      );
     },
     resolveReport(id) {
       const r = this.state.reports.find((x) => x.id === id);
@@ -291,7 +312,7 @@
       r.status = 'done';
       r.doneBy = this.who();
       r.doneAt = Date.now();
-      this._log('Laporan ditindaklanjuti: ' + r.text, 'info');
+      this._log('Laporan telah ditindaklanjuti: ' + r.text, 'info');
       this.commit();
     },
 
@@ -412,8 +433,8 @@
           });
         }
       });
-      st.reports.filter((r) => r.status === 'open').forEach((r) =>
-        out.push({ key: 'rp-' + r.id, level: 'warning', kind: 'laporan', title: 'Laporan dari ' + r.who, body: r.text, go: 'stok', ref: r.id, at: r.at }),
+      this.reportsFor().forEach((r) =>
+        out.push({ key: 'rp-' + r.id, level: 'warning', kind: 'laporan', title: 'Laporan dari ' + r.who, body: r.text, go: (REPORT_TOPICS[r.topic] || REPORT_TOPICS.stok).screen, ref: r.id, at: r.at }),
       );
       const rank = { critical: 0, serious: 1, warning: 2 };
       return out.sort((a, b) => rank[a.level] - rank[b.level] || a.at - b.at);

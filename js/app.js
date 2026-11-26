@@ -15,7 +15,7 @@
     ['forecast', 'Forecast', 'Berapa yang perlu dipesan ke maklon, dan kapan', 'trend'],
     ['aktivitas', 'Aktivitas', 'Jejak setiap perubahan dan setiap sinkronisasi', 'clock'],
     ['pengaturan', 'Pengaturan', 'Parameter, foto produk, hak akses', 'gear'],
-    ['panduan', 'Panduan', 'Cara memakai Fluxora: tur, langkah per tugas, istilah, dan tanya-jawab', 'help'],
+    ['panduan', 'Panduan', 'Modul belajar, panduan interaktif, langkah per tugas, istilah, dan tanya jawab', 'book'],
   ];
 
   const app = (FX.app = { screen: null, live: null, lastSync: { shopee: Date.now(), tokopedia: Date.now() } });
@@ -72,7 +72,7 @@
     const liveBtn = document.querySelector('[data-sim="live"]');
     liveBtn.classList.toggle('live-on', !!app.live);
     liveBtn.setAttribute('aria-pressed', String(!!app.live));
-    liveBtn.innerHTML = ui.icon('bolt', 14) + (app.live ? 'Live aktif' : 'Live');
+    liveBtn.innerHTML = ui.icon('bolt', 14) + (app.live ? 'Otomatis aktif' : 'Otomatis');
   }
 
   function render(reason) {
@@ -138,7 +138,7 @@
           )
           .join('') +
         '</div></div>'
-      : '<div class="empty">Tidak ada yang perlu ditindaklanjuti.</div>';
+      : '<div class="empty">Tidak ada hal yang perlu ditindaklanjuti.</div>';
     const d = ui.drawer({
       title: 'Perlu perhatian',
       sub: list.length + ' hal: batas serah kurir, stok menipis, rekomendasi PO, dan laporan staf',
@@ -169,7 +169,7 @@
   // order goes through the same store action a real webhook would call.
   function randomOrder(channel, forced) {
     const st = S.state;
-    const r = Math.random;
+    const r = FX.rand;
     let items;
     if (forced) items = [forced];
     else {
@@ -186,7 +186,7 @@
   function weightedProduct() {
     const ps = S.state.products;
     const w = ps.map((p) => 1 + FX.forecast.one(p.id).perWeek);
-    let x = Math.random() * FX.sum(w);
+    let x = FX.rand() * FX.sum(w);
     for (let i = 0; i < ps.length; i++) if ((x -= w[i]) <= 0) return ps[i];
     return ps[0];
   }
@@ -196,10 +196,10 @@
       const it = res.order.items[0];
       const p = S.product(it.pid);
       const other = channel === 'shopee' ? 'tokopedia' : 'shopee';
-      ui.toast(esc(p.name) + ' ' + it.size + ' terjual. Stok sekarang ' + p.stock[it.size] + ', listing ' + FX.CHANNELS[other].name + ' ikut diperbarui.', '', 'Pesanan ' + FX.CHANNELS[channel].name);
+      ui.toast(esc(p.name) + ' ' + it.size + ' terjual. Stok saat ini ' + p.stock[it.size] + ', dan listing ' + FX.CHANNELS[other].name + ' ikut diperbarui.', '', 'Pesanan ' + FX.CHANNELS[channel].name);
       pulse(other);
     } else {
-      ui.toast('Checkout di ' + FX.CHANNELS[channel].name + ' ditahan karena ' + esc(res.reason) + ' di semua kanal. Tidak ada pesanan yang perlu dibatalkan.', 'bad', 'Overselling dicegah');
+      ui.toast('Checkout di ' + FX.CHANNELS[channel].name + ' ditolak karena ' + esc(res.reason) + ' di semua kanal. Tidak ada pesanan yang perlu dibatalkan.', 'bad', 'Overselling dicegah');
     }
   }
   function pulse(ch) {
@@ -216,11 +216,11 @@
     const candidates = [];
     S.state.products.forEach((p) => FX.SIZES.forEach((s) => p.stock[s] === 1 && candidates.push([p, s])));
     let p, s;
-    if (candidates.length) [p, s] = candidates[Math.floor(Math.random() * candidates.length)];
+    if (candidates.length) [p, s] = candidates[Math.floor(FX.rand() * candidates.length)];
     else {
       let best = null;
       S.state.products.forEach((pp) => FX.SIZES.forEach((ss) => pp.stock[ss] > 0 && (!best || pp.stock[ss] < best[0].stock[best[1]]) && (best = [pp, ss])));
-      if (!best) return ui.toast('Semua stok habis. Catat barang masuk dulu.', 'bad');
+      if (!best) return ui.toast('Semua stok sedang habis. Catat barang masuk terlebih dahulu.', 'bad');
       [p, s] = best;
       while (p.stock[s] > 1) randomOrder('shopee', { pid: p.id, size: s, qty: 1, price: p.price });
     }
@@ -229,7 +229,7 @@
     const b = randomOrder('tokopedia', Object.assign({}, item));
     pulse('shopee');
     pulse('tokopedia');
-    ui.toast('Sisa 1 pcs ' + esc(p.name) + ' ' + s + '. Shopee: ' + (a.ok ? 'pesanan diterima' : 'ditahan') + '. Tokopedia: ' + (b.ok ? 'pesanan diterima' : 'checkout ditahan karena stok sudah 0') + '.', '', 'Rebutan stok');
+    ui.toast('Sisa 1 pcs ' + esc(p.name) + ' ' + s + '. Shopee: ' + (a.ok ? 'pesanan diterima' : 'ditolak') + '. Tokopedia: ' + (b.ok ? 'pesanan diterima' : 'checkout ditolak karena stok sudah 0') + '.', '', 'Uji stok terakhir');
   }
 
   function bindShell() {
@@ -251,7 +251,7 @@
           app.live = null;
         } else {
           app.live = setInterval(() => {
-            const ch = Math.random() < 0.68 ? 'shopee' : 'tokopedia';
+            const ch = FX.rand() < 0.68 ? 'shopee' : 'tokopedia';
             announce(randomOrder(ch), ch);
           }, 5000);
         }
@@ -259,6 +259,7 @@
       }
     });
     document.querySelector('.bell').onclick = openNotifs;
+    bindSimNote();
     window.addEventListener('hashchange', () => FX.auth.session() && app.go(location.hash.slice(1) || allowed()[0]));
     setInterval(() => {
       Object.keys(FX.CHANNELS).forEach((k) => {
@@ -268,6 +269,54 @@
       render('bg');
     }, 30000);
   }
+
+  // ------------------------------------------------------- simulation notice
+  // The app always says that it runs on sample data. The strip can be folded
+  // into a small chip for the session, but never disappears completely.
+  function bindSimNote() {
+    const note = document.getElementById('sim-note');
+    const chip = document.getElementById('sim-chip');
+    const KEY = 'fluxora.simnote.min';
+    const set = (min) => {
+      note.classList.toggle('is-min', min);
+      chip.classList.toggle('on', min);
+      try {
+        min ? sessionStorage.setItem(KEY, '1') : sessionStorage.removeItem(KEY);
+      } catch (e) {}
+    };
+    let min = false;
+    try {
+      min = !!sessionStorage.getItem(KEY);
+    } catch (e) {}
+    set(min);
+    document.getElementById('sim-note-hide').onclick = () => set(true);
+    chip.onclick = () => set(false);
+    document.getElementById('sim-note-more').onclick = app.simInfo;
+  }
+  app.simInfo = function () {
+    const D = FX.DEMO;
+    ui.drawer({
+      title: 'Tentang mode simulasi',
+      sub: D.label,
+      body:
+        '<p class="ink2" style="margin:0">Fluxora saat ini berjalan sebagai <b>prototipe simulasi</b>. Tujuannya adalah memperlihatkan alur kerja Beckycoo dari pesanan masuk sampai keputusan produksi, sebelum dihubungkan ke toko yang sebenarnya.</p>' +
+        '<div class="panel"><table class="t"><tbody>' +
+        '<tr><td>Sumber data</td><td>Satu berkas data simulasi terpusat (<span class="mono">data/demo-data.js</span>) yang dibaca oleh semua halaman.</td></tr>' +
+        '<tr><td>Konsistensi</td><td>Setiap browser dan perangkat memulai demo dengan angka yang sama. Urutan tindakan yang sama menghasilkan hasil yang sama.</td></tr>' +
+        '<tr><td>Pesanan</td><td>Dibuat oleh tombol Simulasi pesanan dan oleh pesanan contoh yang bertambah setiap kali masuk. Belum ada koneksi ke Shopee atau Tokopedia.</td></tr>' +
+        '<tr><td>Penyimpanan</td><td>Perubahan selama demo disimpan di browser yang sedang dipakai, lalu dapat dikembalikan ke kondisi awal kapan saja.</td></tr>' +
+        '<tr><td>Isi data</td><td>Nama produk, harga, pembeli, dan transaksi adalah contoh, bukan data Beckycoo yang sebenarnya.</td></tr>' +
+        '</tbody></table></div>' +
+        '<div class="callout">Integrasi dengan Shopee Open Platform dan Tokopedia Open API direncanakan pada sprint berikutnya.</div>',
+      foot: (S.role === 'owner' ? '<button class="btn" id="sim-reset">Atur ulang data demo</button><span style="flex:1"></span>' : '') + '<button class="btn primary" data-close>Mengerti</button>',
+      onMount(d) {
+        const r = d.querySelector('#sim-reset');
+        if (r)
+          r.onclick = () =>
+            ui.confirm('Atur ulang data demo?', 'Semua pesanan, PO, dan entri kas yang dibuat selama demo akan dihapus, lalu data dimuat ulang dari berkas data simulasi.', 'Atur ulang', () => (S.reset(), ui.toast('Data demo telah dikembalikan ke kondisi awal.', '', 'Atur ulang')));
+      },
+    });
+  };
 
   // ------------------------------------------------------------------ boot
   S.load();
